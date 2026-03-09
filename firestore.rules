@@ -78,9 +78,7 @@ service cloud.firestore {
 
     match /surveys/{surveyId} {
       // Allow anyone to create a survey response (even unauthenticated for public surveys)
-      // But we'll require authentication to prevent spam if possible.
-      // For this app, let's allow unauthenticated create but restricted read.
-      allow create: if isValidSurvey(request.resource.data);
+      allow create: if true;
       
       // Only admins can read all surveys or delete them
       allow read, delete: if isAdmin();

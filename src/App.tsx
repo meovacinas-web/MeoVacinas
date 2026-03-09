@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { 
   ShieldCheck, 
@@ -76,11 +76,24 @@ import {
   Legend
 } from 'recharts';
 
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: any;
+}
+
 // Error Boundary Component
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
-  constructor(props: { children: React.ReactNode }) {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState;
+  public props: ErrorBoundaryProps;
+
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
+    this.props = props;
   }
 
   static getDerivedStateFromError(error: any) {
@@ -244,6 +257,8 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
   const [skippedVax, setSkippedVax] = useState<string>('');
   const [influence, setInfluence] = useState<string>('');
 
+  const [submitted, setSubmitted] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -266,18 +281,37 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
         created_at: serverTimestamp()
       };
 
+      console.log('Enviando dados da pesquisa:', surveyData);
       await addDoc(collection(db, 'surveys'), surveyData);
       
-      alert('Obrigado por sua participação anônima!');
-      onComplete();
+      setSubmitted(true);
+      setTimeout(() => {
+        onComplete();
+      }, 3000);
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao enviar pesquisa:', err);
       handleFirestoreError(err, OperationType.CREATE, 'surveys');
-      alert('Erro ao enviar pesquisa. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center py-20"
+      >
+        <div className="w-20 h-20 bg-vax-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-10 h-10 text-vax-green" />
+        </div>
+        <h3 className="text-3xl font-serif mb-4">Obrigado!</h3>
+        <p className="text-slate-600">Suas respostas anônimas foram enviadas com sucesso e ajudarão em nossa pesquisa científica.</p>
+        <p className="text-slate-400 text-sm mt-8 italic">Redirecionando para o início...</p>
+      </motion.div>
+    );
+  }
 
   const RadioGroup = ({ name, options, label, onChange }: { name: string, options: string[], label: string, onChange?: (val: string) => void }) => (
     <div className="space-y-3">
@@ -532,7 +566,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Usuário</label>
+              <label className="text-xs font-bold text-slate-700 ml-1">Usuário (Mock)</label>
               <input 
                 type="text" 
                 value={username}
@@ -543,7 +577,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Senha</label>
+              <label className="text-xs font-bold text-slate-700 ml-1">Senha (Mock)</label>
               <input 
                 type="password" 
                 value={password}
@@ -554,11 +588,15 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
               />
             </div>
             {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+            <p className="text-[10px] text-slate-400 text-center mt-2">
+              Nota: O login por senha é apenas para visualização da interface. 
+              Para acessar os dados reais do Firebase, use o Google Login com um e-mail autorizado.
+            </p>
             <button 
               type="submit"
               className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4"
             >
-              Entrar no Painel
+              Entrar no Painel (Simulação)
             </button>
           </form>
         </div>
@@ -570,8 +608,10 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
 const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => {
   const [surveys, setSurveys] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Iniciando monitoramento em tempo real...');
     const q = query(collection(db, 'surveys'), orderBy('created_at', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -579,10 +619,14 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
         id: doc.id,
         ...doc.data()
       }));
+      console.log(`${data.length} pesquisas carregadas em tempo real.`);
       setSurveys(data);
       setIsConnected(true);
+      setIsLoading(false);
     }, (error) => {
+      console.error('Erro no monitoramento em tempo real:', error);
       setIsConnected(false);
+      setIsLoading(false);
       handleFirestoreError(error, OperationType.LIST, 'surveys');
     });
 
@@ -700,6 +744,15 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
     name: group.name,
     value: surveys.filter(s => s.age === group.key).length
   }));
+
+  if (isLoading) {
+    return (
+      <div className="pt-32 pb-24 px-6 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 border-4 border-vax-blue/20 border-t-vax-blue rounded-full animate-spin mb-6"></div>
+        <p className="text-slate-500 font-mono text-sm animate-pulse">Conectando ao banco de dados em tempo real...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
