@@ -1,10 +1,10 @@
 {
-  "apiKey": "AIzaSyBAYAKfAUJYLensvAtPNiKeOgcAqBFKnJA",
-  "authDomain": "meovacinas-6fecc.firebaseapp.com",
-  "projectId": "meovacinas-6fecc",
-  "storageBucket": "meovacinas-6fecc.firebasestorage.app",
-  "messagingSenderId": "468586301201",
-  "appId": "1:468586301201:web:53c53a481569133532aeb0",
-  "measurementId": "G-51X0DR1J7Q",
-  "firestoreDatabaseId": "(default)"
+  "projectId": "gen-lang-client-0586561982",
+  "appId": "1:492721192363:web:89e237491f87673e8de6ee",
+  "apiKey": "AIzaSyC20Cb3_XqWEhYjtyJ5W3lmNGo1G8wfSu4",
+  "authDomain": "gen-lang-client-0586561982.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-8b591efa-269b-4b1e-a7aa-9efa9ebf4c05",
+  "storageBucket": "gen-lang-client-0586561982.firebasestorage.app",
+  "messagingSenderId": "492721192363",
+  "measurementId": ""
 }
