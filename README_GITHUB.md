@@ -29,6 +29,11 @@ Se você preferir usar GitHub Actions, o repositório deve estar configurado par
 1. Execute `npm run build`.
 2. Copie o conteúdo da pasta `dist` para o seu repositório no GitHub (ou para a pasta configurada no GitHub Pages).
 
-## Configurações Importantes
-- **Firebase:** O site é totalmente client-side e utiliza o Firebase para autenticação e banco de dados. Certifique-se de que o domínio do GitHub Pages (`seu-usuario.github.io`) esteja autorizado no console do Firebase (Authentication > Settings > Authorized domains).
-- **Base Path:** O projeto está configurado com `base: './'` no `vite.config.ts`, o que permite que ele funcione em subpastas ou domínios personalizados sem problemas.
+## Solução para o Site em Branco
+Se o site aparecer em branco no GitHub Pages, verifique:
+1. **Base Path:** O arquivo `vite.config.ts` **DEVE** estar presente no seu repositório. Eu configurei o `base: '/MeoVacinas/'` para que os links de arquivos (JS/CSS) funcionem corretamente na URL do seu projeto.
+2. **Restaurar vite.config.ts:** Se você deletou este arquivo no GitHub, você **DEVE** restaurá-lo. Sem ele, o Vite não sabe como gerar os caminhos corretos.
+3. **Branch de Deploy:** Certifique-se de que o GitHub Pages está configurado para servir o branch `gh-pages` (se usou o script `npm run deploy`) ou a pasta `dist` no branch principal.
+4. **Case Sensitivity:** O nome da pasta no GitHub (`MeoVacinas`) deve ser idêntico ao configurado no `base` do `vite.config.ts`.
+5. **Firebase Authorized Domains:** Certifique-se de que o domínio do GitHub Pages (`meovacinas-web.github.io`) esteja autorizado no console do Firebase (Authentication > Settings > Authorized domains).
+6. **Configuração do GitHub Pages:** No seu repositório no GitHub, vá em **Settings > Pages** e verifique se o "Source" está configurado para o branch `gh-pages` (se usou o script de deploy) ou para a pasta `/docs` ou branch principal se fez o upload manual.
