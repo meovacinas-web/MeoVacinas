@@ -259,10 +259,12 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
   const [influence, setInfluence] = useState<string>('');
 
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
     try {
       // Basic validation
@@ -270,7 +272,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
       const missingFields = requiredFields.filter(f => !formData[f]);
       
       if (missingFields.length > 0) {
-        alert('Por favor, responda todas as perguntas obrigatórias antes de enviar.');
+        setError('Por favor, responda todas as perguntas obrigatórias antes de enviar.');
         setIsSubmitting(false);
         return;
       }
@@ -488,6 +490,16 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
         options={['Sim', 'Não', 'Talvez']} 
       />
 
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2"
+        >
+          <AlertTriangle className="w-5 h-5" /> {error}
+        </motion.div>
+      )}
+
       <button 
         type="submit"
         disabled={isSubmitting}
@@ -685,6 +697,31 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
   }, [user]);
 
   const [isResetting, setIsResetting] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
+
+  const handleReset = async () => {
+    if (resetPassword === '021601') {
+      setIsResetting(true);
+      setResetError(null);
+      try {
+        const snapshot = await getDocs(collection(db, 'surveys'));
+        const deletePromises = snapshot.docs.map(d => deleteDoc(doc(db, 'surveys', d.id)));
+        await Promise.all(deletePromises);
+        setShowResetModal(false);
+        setResetPassword('');
+      } catch (err) {
+        console.error(err);
+        handleFirestoreError(err, OperationType.DELETE, 'surveys');
+        setResetError('Erro ao resetar dados.');
+      } finally {
+        setIsResetting(false);
+      }
+    } else {
+      setResetError('Senha incorreta.');
+    }
+  };
 
   const getChartDataForField = (field: string) => {
     const counts = surveys.reduce((acc: any, curr) => {
@@ -848,12 +885,12 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
         
         <div className="flex flex-wrap gap-4">
           <button 
-            onClick={resetData}
+            onClick={() => setShowResetModal(true)}
             disabled={isResetting}
             className={`flex items-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-xl font-bold transition-all shadow-sm ${isResetting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50 hover:scale-[1.02] active:scale-[0.95]'}`}
           >
             <ShieldAlert className={`w-5 h-5 ${isResetting ? 'animate-spin' : ''}`} /> 
-            {isResetting ? 'Resetando...' : 'Resetar Dados'}
+            Resetar Dados
           </button>
           <button 
             onClick={downloadData}
@@ -997,6 +1034,56 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           </div>
         </div>
       </div>
+
+      {/* Reset Modal */}
+      <AnimatePresence>
+        {showResetModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white p-8 rounded-[32px] shadow-2xl max-w-md w-full"
+            >
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6">
+                <ShieldAlert className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-serif mb-2">Resetar Banco de Dados</h3>
+              <p className="text-slate-500 text-sm mb-6">Esta ação apagará permanentemente todas as respostas da pesquisa. Digite a senha de administrador para confirmar.</p>
+              
+              <div className="space-y-4">
+                <input 
+                  type="password" 
+                  placeholder="Senha de Administrador"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  className="w-full px-6 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                />
+                
+                {resetError && (
+                  <p className="text-red-500 text-xs font-bold">{resetError}</p>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button 
+                    onClick={() => setShowResetModal(false)}
+                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={handleReset}
+                    disabled={isResetting || !resetPassword}
+                    className="flex-1 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                  >
+                    {isResetting ? 'Resetando...' : 'Confirmar'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="glass-card rounded-[32px] shadow-xl overflow-hidden">
         <div className="p-8 border-b border-slate-100 flex justify-between items-center">
