@@ -1,5 +1,10 @@
-import React, { useState, useEffect, Component } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"; 
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+
+import { collection, onSnapshot } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+
+import { db, auth } from "./firebase";
   ShieldCheck, 
   AlertTriangle, 
   Microscope, 
