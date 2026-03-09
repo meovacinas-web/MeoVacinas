@@ -1,15 +1,6 @@
-// Import Firebase
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { 
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-  serverTimestamp
-} from "firebase/firestore";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-// Configuração do seu projeto
 const firebaseConfig = {
   apiKey: "AIzaSyBAYAKfAUJYLensvAtPNiKeOgcAqBFKnJA",
   authDomain: "meovacinas-6fecc.firebaseapp.com",
@@ -20,12 +11,12 @@ const firebaseConfig = {
   measurementId: "G-51X0DR1J7Q"
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
-// 🔥 Inicializa Firestore
 export const db = getFirestore(app);
 
-// referência da coleção
-export const surveysRef = collection(db, "surveys");
+export {
+  collection,
+  addDoc,
+  serverTimestamp
+};
