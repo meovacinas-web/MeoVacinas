@@ -613,9 +613,19 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
   const [surveys, setSurveys] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [permissionError, setPermissionError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('Iniciando monitoramento em tempo real...');
+    
+    // Check if user is authenticated via Firebase
+    if (!auth.currentUser) {
+      console.warn('Usuário não autenticado no Firebase. O monitoramento não será iniciado.');
+      setIsLoading(false);
+      setPermissionError('Você não está autenticado no Firebase. Por favor, saia e entre usando o botão "Entrar com Google" para ver os dados reais.');
+      return;
+    }
+
     const q = query(collection(db, 'surveys'), orderBy('created_at', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -627,11 +637,17 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
       setSurveys(data);
       setIsConnected(true);
       setIsLoading(false);
+      setPermissionError(null);
     }, (error) => {
       console.error('Erro no monitoramento em tempo real:', error);
       setIsConnected(false);
       setIsLoading(false);
-      handleFirestoreError(error, OperationType.LIST, 'surveys');
+      
+      if (error.code === 'permission-denied') {
+        setPermissionError('Acesso negado. Sua conta não tem permissão de administrador para visualizar estes dados. Certifique-se de estar usando o e-mail meovacinas@gmail.com.');
+      } else {
+        handleFirestoreError(error, OperationType.LIST, 'surveys');
+      }
     });
 
     return () => unsubscribe();
@@ -755,6 +771,28 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
       <div className="pt-32 pb-24 px-6 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="w-16 h-16 border-4 border-vax-blue/20 border-t-vax-blue rounded-full animate-spin mb-6"></div>
         <p className="text-slate-500 font-mono text-sm animate-pulse">Conectando ao banco de dados em tempo real...</p>
+      </div>
+    );
+  }
+
+  if (permissionError) {
+    return (
+      <div className="pt-32 pb-24 px-6 flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto text-center">
+        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mb-8">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <h2 className="text-3xl font-serif mb-4">Acesso Restrito</h2>
+        <p className="text-slate-600 mb-10 leading-relaxed">
+          {permissionError}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+          <button 
+            onClick={onLogout}
+            className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-vax-blue transition-all shadow-lg flex items-center justify-center gap-2"
+          >
+            <LogOut className="w-5 h-5" /> Sair e Entrar com Google
+          </button>
+        </div>
       </div>
     );
   }
