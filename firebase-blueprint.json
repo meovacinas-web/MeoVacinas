@@ -6,7 +6,7 @@
       "type": "object",
       "properties": {
         "age": { "type": "string", "description": "Age group of the respondent" },
-        "favor": { "type": "string", "description": "Whether the respondent is in favor of vaccines" },
+        "vaccineOpinion": { "type": "string", "description": "Whether the respondent is in favor of vaccines" },
         "importance": { "type": "string", "description": "Opinion on vaccine importance" },
         "updated": { "type": "string", "description": "Whether vaccination status is updated" },
         "covid": { "type": "string", "description": "COVID-19 vaccination status" },
@@ -19,8 +19,7 @@
         "why_not_vax": { "type": "string", "description": "Reason for not vaccinating" },
         "campaigns": { "type": "string", "description": "Opinion on health campaigns" },
         "created_at": { "type": "string", "format": "date-time", "description": "Timestamp of submission" }
-      },
-      "required": ["age", "favor", "importance", "updated", "covid", "created_at"]
+      }
     }
   },
   "firestore": {

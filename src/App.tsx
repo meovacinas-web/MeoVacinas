@@ -238,7 +238,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<any>({
     age: '',
-    favor: '',
+    vaccineOpinion: '',
     importance: '',
     updated: '',
     covid: '',
@@ -266,7 +266,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
     try {
       const surveyData = {
         age: formData.age,
-        favor: formData.favor,
+        vaccineOpinion: formData.vaccineOpinion,
         importance: formData.importance,
         updated: formData.updated,
         covid: formData.covid,
@@ -281,8 +281,13 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
         created_at: serverTimestamp()
       };
 
-      console.log('Enviando dados da pesquisa:', surveyData);
-      await addDoc(collection(db, 'surveys'), surveyData);
+      // Clean up undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(surveyData).filter(([_, v]) => v !== undefined)
+      );
+
+      console.log('Enviando dados da pesquisa:', cleanData);
+      await addDoc(collection(db, 'surveys'), cleanData);
       
       setSubmitted(true);
       setTimeout(() => {
@@ -322,7 +327,6 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
             <input 
               type="radio" 
               name={name} 
-              required 
               value={option}
               checked={formData[name] === option}
               onChange={(e) => {
@@ -352,7 +356,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
 
       {/* 2. Favor da vacinação */}
       <RadioGroup 
-        name="favor" 
+        name="vaccineOpinion" 
         label="2. Você é a favor da vacinação?" 
         options={['Sim', 'Não', 'Em parte']} 
       />
@@ -703,9 +707,9 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
   };
 
   const downloadData = () => {
-    const headers = "ID,Idade,Favor,Importancia,Carteira,COVID,Doses,Ultimos 5 Anos,Confiança,Influencia,Deixou de Tomar,Motivo,Opiniao,Campanhas\n";
+    const headers = "ID,Idade,Opinião Vacina,Importancia,Carteira,COVID,Doses,Ultimos 5 Anos,Confiança,Influencia,Deixou de Tomar,Motivo,Opiniao,Campanhas\n";
     const csvContent = surveys.map(r => 
-      `${r.id},"${r.age}","${r.favor}","${r.importance}","${r.updated}","${r.covid}","${r.doses}","${r.last_5_years}","${r.trust}","${r.influence}","${r.skipped}","${r.skipped_reason || ''}","${r.why_not_vax || ''}","${r.campaigns}"`
+      `${r.id},"${r.age}","${r.vaccineOpinion}","${r.importance}","${r.updated}","${r.covid}","${r.doses}","${r.last_5_years}","${r.trust}","${r.influence}","${r.skipped}","${r.skipped_reason || ''}","${r.why_not_vax || ''}","${r.campaigns}"`
     ).join("\n");
     
     const blob = new Blob([headers + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -721,7 +725,8 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
 
   // Calculate chart data
   const favorCounts = surveys.reduce((acc: any, curr) => {
-    acc[curr.favor] = (acc[curr.favor] || 0) + 1;
+    const val = curr.vaccineOpinion || 'Não informado';
+    acc[val] = (acc[val] || 0) + 1;
     return acc;
   }, {});
 
@@ -947,18 +952,18 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
               {surveys.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-8 py-4 text-sm font-mono text-slate-400">#{row.id}</td>
-                  <td className="px-8 py-4 text-sm font-medium">{row.age}</td>
+                  <td className="px-8 py-4 text-sm font-medium">{row.age || '-'}</td>
                   <td className="px-8 py-4 text-sm">
                     <span className={`px-2 py-1 rounded-md text-xs font-bold ${
-                      row.favor === 'Sim' ? 'bg-green-100 text-green-700' : 
-                      row.favor === 'Não' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                      row.vaccineOpinion === 'Sim' ? 'bg-green-100 text-green-700' : 
+                      row.vaccineOpinion === 'Não' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                     }`}>
-                      {row.favor}
+                      {row.vaccineOpinion || 'N/A'}
                     </span>
                   </td>
-                  <td className="px-8 py-4 text-sm">{row.covid}</td>
-                  <td className="px-8 py-4 text-sm text-slate-500">{row.doses}</td>
-                  <td className="px-8 py-4 text-sm font-medium">{row.trust}</td>
+                  <td className="px-8 py-4 text-sm">{row.covid || '-'}</td>
+                  <td className="px-8 py-4 text-sm text-slate-500">{row.doses || '-'}</td>
+                  <td className="px-8 py-4 text-sm font-medium">{row.trust || '-'}</td>
                 </tr>
               ))}
             </tbody>

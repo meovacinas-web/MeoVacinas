@@ -2,94 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: surveys
-    // Document ID: auto-generated
-    // Fields:
-    //   - age: string (required, max 50) - Age group
-    //   - favor: string (required, max 50) - Opinion on vaccines
-    //   - importance: string (required, max 50) - Opinion on importance
-    //   - updated: string (required, max 50) - Status
-    //   - covid: string (required, max 50) - COVID status
-    //   - doses: string (optional, max 50) - COVID doses
-    //   - last_5_years: string (optional, max 50) - Recent history
-    //   - trust: string (optional, max 50) - Trust level
-    //   - influence: string (optional, max 100) - Influence source
-    //   - skipped: string (optional, max 50) - Skipped status
-    //   - skipped_reason: string (optional, max 200) - Reason
-    //   - why_not_vax: string (optional, max 200) - Reason
-    //   - campaigns: string (optional, max 50) - Campaign opinion
-    //   - created_at: timestamp (required) - Submission time
-    //
-    // ===============================================================
-
-    // ===============================================================
-    // Helper Functions
-    // ===============================================================
-    
-    function isAuthenticated() {
-      return request.auth != null;
+    // WARNING: These rules are extremely insecure and allow anyone to read, write, and delete 
+    // any data in your database. Use only for temporary testing and never in production.
+    match /{document=**} {
+      allow read, write: if true;
     }
 
-    function isAdmin() {
-      return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "meovacinas@gmail.com" && request.auth.token.email_verified == true));
-    }
-
-    function hasRequiredFields(fields) {
-      return request.resource.data.keys().hasAll(fields);
-    }
-
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
-    }
-
-    function isValidSurvey(data) {
-      return hasRequiredFields(['age', 'favor', 'importance', 'updated', 'covid', 'created_at']) &&
-             hasOnlyAllowedFields(['age', 'favor', 'importance', 'updated', 'covid', 'doses', 'last_5_years', 'trust', 'influence', 'skipped', 'skipped_reason', 'why_not_vax', 'campaigns', 'created_at']) &&
-             data.age is string && data.age.size() <= 50 &&
-             data.favor is string && data.favor.size() <= 50 &&
-             data.importance is string && data.importance.size() <= 50 &&
-             data.updated is string && data.updated.size() <= 50 &&
-             data.covid is string && data.covid.size() <= 50 &&
-             data.created_at is timestamp &&
-             (!('doses' in data) || (data.doses is string && data.doses.size() <= 50)) &&
-             (!('last_5_years' in data) || (data.last_5_years is string && data.last_5_years.size() <= 50)) &&
-             (!('trust' in data) || (data.trust is string && data.trust.size() <= 50)) &&
-             (!('influence' in data) || (data.influence is string && data.influence.size() <= 100)) &&
-             (!('skipped' in data) || (data.skipped is string && data.skipped.size() <= 50)) &&
-             (!('skipped_reason' in data) || (data.skipped_reason is string && data.skipped_reason.size() <= 200)) &&
-             (!('why_not_vax' in data) || (data.why_not_vax is string && data.why_not_vax.size() <= 200)) &&
-             (!('campaigns' in data) || (data.campaigns is string && data.campaigns.size() <= 50));
-    }
-
-    // ===============================================================
-    // Rules
-    // ===============================================================
-
-    match /users/{userId} {
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow write: if isAdmin();
-    }
-
-    match /surveys/{surveyId} {
-      // Allow anyone to create a survey response (even unauthenticated for public surveys)
-      allow create: if true;
-      
-      // Only admins can read all surveys or delete them
-      allow read, delete: if isAdmin();
-      
-      // Updates are not allowed for surveys once submitted
-      allow update: if false;
-    }
-
-    // Default deny
-    match /{path=**} {
-      allow read, write: if false;
-    }
   }
 }
