@@ -658,22 +658,111 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   );
 };
 
-const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => {
+const DashboardPage = ({ onLogout }: { onLogout: () => void }) => {
+
   const [surveys, setSurveys] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('Iniciando monitoramento em tempo real...');
-    
-    // Check if user is authenticated via Firebase
-    if (!auth.currentUser) {
-      console.warn('Usuário não autenticado no Firebase. O monitoramento não será iniciado.');
-      setIsLoading(false);
-      setPermissionError('Você não está autenticado no Firebase. Por favor, saia e entre usando o botão "Entrar com Google" para ver os dados reais.');
-      return;
-    }
+
+    console.log("Iniciando conexão com Firestore...");
+
+    const unsubscribe = onSnapshot(
+      collection(db, "surveys"),
+      (snapshot) => {
+
+        const data: any[] = [];
+
+        snapshot.forEach((doc) => {
+          data.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+
+        console.log("Dados recebidos:", data);
+
+        setSurveys(data);
+        setIsConnected(true);
+        setIsLoading(false);
+      },
+      (error) => {
+
+        console.error("Erro Firestore:", error);
+
+        setPermissionError("Erro de permissão no Firestore.");
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+
+  }, []);
+
+  // loading
+  if (isLoading) {
+    return (
+      <div style={{ padding: 40 }}>
+        Carregando dados do painel...
+      </div>
+    );
+  }
+
+  // erro de permissão
+  if (permissionError) {
+    return (
+      <div style={{ padding: 40 }}>
+        {permissionError}
+      </div>
+    );
+  }
+
+  return (
+
+    <div style={{ padding: 40 }}>
+
+      <h1>Painel de Respostas</h1>
+
+      <button onClick={onLogout}>
+        Sair
+      </button>
+
+      <p>
+        Conectado: {isConnected ? "Sim" : "Não"}
+      </p>
+
+      <p>
+        Total de respostas: {surveys.length}
+      </p>
+
+      <div>
+
+        {surveys.map((survey) => (
+
+          <div
+            key={survey.id}
+            style={{
+              border: "1px solid #ccc",
+              padding: 10,
+              marginBottom: 10
+            }}
+          >
+
+            <pre>
+              {JSON.stringify(survey, null, 2)}
+            </pre>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+  );
+};
 
     const q = query(collection(db, 'surveys'), orderBy('created_at', 'desc'));
     
