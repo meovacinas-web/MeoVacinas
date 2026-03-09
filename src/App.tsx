@@ -523,13 +523,28 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple mock authentication for legacy support
-    if (username === 'admin' && password === 'projeto2026') {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Map "admin" username to a real Firebase email
+      const email = username.toLowerCase() === 'admin' ? 'admin@meovacinas.com.br' : username;
+      
+      await signInWithEmailAndPassword(auth, email, password);
       onLogin();
-    } else {
-      setError('Usuário ou senha incorretos. Tente admin / projeto2026');
+    } catch (err: any) {
+      console.error('Erro no login por senha:', err);
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Usuário ou senha incorretos. Verifique as credenciais.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Formato de e-mail inválido. Use "admin" ou um e-mail válido.');
+      } else {
+        setError('Erro ao autenticar. Verifique sua conexão ou se o usuário foi criado no Firebase.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -574,7 +589,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Usuário (Mock)</label>
+              <label className="text-xs font-bold text-slate-700 ml-1">Usuário</label>
               <input 
                 type="text" 
                 value={username}
@@ -585,7 +600,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Senha (Mock)</label>
+              <label className="text-xs font-bold text-slate-700 ml-1">Senha</label>
               <input 
                 type="password" 
                 value={password}
@@ -597,14 +612,15 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
             </div>
             {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
             <p className="text-[10px] text-slate-400 text-center mt-2">
-              Nota: O login por senha é apenas para visualização da interface. 
-              Para acessar os dados reais do Firebase, use o Google Login com um e-mail autorizado.
+              Nota: Este é um acesso seguro via Firebase. 
+              O usuário deve estar previamente cadastrado no console do projeto.
             </p>
             <button 
               type="submit"
-              className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4"
+              disabled={isLoading}
+              className={`w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4 flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              Entrar no Painel (Simulação)
+              {isLoading ? 'Autenticando...' : 'Entrar no Painel'}
             </button>
           </form>
         </div>
