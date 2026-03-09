@@ -1,6 +1,5 @@
-import React, { useState, useEffect, Component } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import { 
+import React, { useState, useEffect, Component } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"; 
   ShieldCheck, 
   AlertTriangle, 
   Microscope, 
