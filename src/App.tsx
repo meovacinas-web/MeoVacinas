@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-
-import { collection, onSnapshot } from "firebase/firestore";
-import { signOut } from "firebase/auth";
-
-import { db, auth } from "./firebase";
+import React, { useState, useEffect, Component } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { 
   ShieldCheck, 
   AlertTriangle, 
   Microscope, 
@@ -47,6 +43,7 @@ import {
   auth, 
   googleProvider, 
   signInWithPopup, 
+  signInWithEmailAndPassword,
   signOut, 
   onAuthStateChanged, 
   collection, 
@@ -268,6 +265,16 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
     setIsSubmitting(true);
     
     try {
+      // Basic validation
+      const requiredFields = ['age', 'vaccineOpinion', 'importance', 'updated', 'covid', 'last_5_years', 'trust', 'influence', 'skipped', 'campaigns'];
+      const missingFields = requiredFields.filter(f => !formData[f]);
+      
+      if (missingFields.length > 0) {
+        alert('Por favor, responda todas as perguntas obrigatórias antes de enviar.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const surveyData = {
         age: formData.age,
         vaccineOpinion: formData.vaccineOpinion,
@@ -500,62 +507,33 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
- useEffect(() => {
-  console.log('Iniciando monitoramento...');
-
-  const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-
-    if (!user) {
-      console.warn("Usuário não autenticado.");
-      setPermissionError("Faça login para ver os dados.");
-      setIsLoading(false);
-      return;
-    }
-
-    console.log("Usuário autenticado:", user.email);
-
-    const q = query(
-      collection(db, "surveys"),
-      orderBy("created_at", "desc")
-    );
-
-    const unsubscribeSnapshot = onSnapshot(
-      q,
-      (snapshot) => {
-
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        console.log("Pesquisas carregadas:", data.length);
-
-        setSurveys(data);
-        setIsConnected(true);
-        setIsLoading(false);
-        setPermissionError(null);
-      },
-      (error) => {
-
-        console.error("Erro Firestore:", error);
-
-        setIsConnected(false);
-        setIsLoading(false);
-
-        if (error.code === "permission-denied") {
-          setPermissionError(
-            "Acesso negado. Verifique as regras do Firestore."
-          );
-        }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        onLogin();
       }
-    );
+    });
+    return () => unsubscribe();
+  }, [onLogin]);
 
-    return () => unsubscribeSnapshot();
-  });
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      await signInWithPopup(auth, googleProvider);
+      onLogin();
+    } catch (err: any) {
+      console.error('Erro no login:', err);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domínio não autorizado. Adicione "meovacinas-web.github.io" e os domínios do AI Studio aos "Domínios Autorizados" no Console do Firebase (Autenticação > Configurações).');
+      } else {
+        setError('Erro ao entrar com Google. Verifique se os popups estão permitidos ou se o domínio está autorizado no Firebase.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  return () => unsubscribeAuth();
-
-}, []);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -662,111 +640,22 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   );
 };
 
-const DashboardPage = ({ onLogout }: { onLogout: () => void }) => {
-
+const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | null, key?: string }) => {
   const [surveys, setSurveys] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
   useEffect(() => {
-
-    console.log("Iniciando conexão com Firestore...");
-
-    const unsubscribe = onSnapshot(
-      collection(db, "surveys"),
-      (snapshot) => {
-
-        const data: any[] = [];
-
-        snapshot.forEach((doc) => {
-          data.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-
-        console.log("Dados recebidos:", data);
-
-        setSurveys(data);
-        setIsConnected(true);
-        setIsLoading(false);
-      },
-      (error) => {
-
-        console.error("Erro Firestore:", error);
-
-        setPermissionError("Erro de permissão no Firestore.");
-        setIsLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-
-  }, []);
-
-  // loading
-  if (isLoading) {
-    return (
-      <div style={{ padding: 40 }}>
-        Carregando dados do painel...
-      </div>
-    );
-  }
-
-  // erro de permissão
-  if (permissionError) {
-    return (
-      <div style={{ padding: 40 }}>
-        {permissionError}
-      </div>
-    );
-  }
-
-  return (
-
-    <div style={{ padding: 40 }}>
-
-      <h1>Painel de Respostas</h1>
-
-      <button onClick={onLogout}>
-        Sair
-      </button>
-
-      <p>
-        Conectado: {isConnected ? "Sim" : "Não"}
-      </p>
-
-      <p>
-        Total de respostas: {surveys.length}
-      </p>
-
-      <div>
-
-        {surveys.map((survey) => (
-
-          <div
-            key={survey.id}
-            style={{
-              border: "1px solid #ccc",
-              padding: 10,
-              marginBottom: 10
-            }}
-          >
-
-            <pre>
-              {JSON.stringify(survey, null, 2)}
-            </pre>
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
-  );
-};
+    console.log('Iniciando monitoramento em tempo real...');
+    
+    // Check if user is authenticated via Firebase
+    if (!user) {
+      console.warn('Usuário não autenticado no Firebase. O monitoramento não será iniciado.');
+      setIsLoading(false);
+      setPermissionError('Você não está autenticado no Firebase. Por favor, saia e entre usando o botão "Entrar com Google" para ver os dados reais.');
+      return;
+    }
 
     const q = query(collection(db, 'surveys'), orderBy('created_at', 'desc'));
     
@@ -786,14 +675,14 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void }) => {
       setIsLoading(false);
       
       if (error.code === 'permission-denied') {
-        setPermissionError('Acesso negado. Sua conta não tem permissão de administrador para visualizar estes dados. Certifique-se de estar usando o e-mail meovacinas@gmail.com.');
+        setPermissionError('Acesso negado. Sua conta não tem permissão de administrador para visualizar estes dados. Certifique-se de estar usando um e-mail autorizado (como meovacinas@gmail.com ou admin@meovacinas.com.br).');
       } else {
         handleFirestoreError(error, OperationType.LIST, 'surveys');
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const [isResetting, setIsResetting] = useState(false);
 
@@ -1038,7 +927,7 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void }) => {
                   {field.icon} {field.label}
                 </h4>
                 <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     {field.type === 'bar' ? (
                       <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -1329,7 +1218,7 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
         <h3 className="text-2xl font-serif mb-8 flex items-center gap-3">
           <Database className="w-6 h-6 text-vax-blue" /> Redução de Doenças (%)
         </h3>
-        <ResponsiveContainer width="100%" height="80%">
+        <ResponsiveContainer width="100%" height="80%" minWidth={0}>
           <BarChart data={diseaseEradicationData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
             <XAxis type="number" domain={[0, 100]} stroke="#94a3b8" />
@@ -1387,8 +1276,22 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
 
 export default function App() {
   const [view, setView] = useState<ViewState>('home');
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setIsAuthChecking(false);
+      // If user is logged in and on login page, move to dashboard
+      if (u && view === 'login') {
+        setView('dashboard');
+      }
+    });
+    return () => unsubscribe();
+  }, [view]);
 
   const handleLogout = async () => {
     try {
@@ -1559,7 +1462,7 @@ export default function App() {
                     </div>
                     
                     <div className="h-[400px] bg-white/5 p-6 rounded-3xl border border-white/10">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <AreaChart data={vaccinationData}>
                           <defs>
                             <linearGradient id="colorCases" x1="0" y1="0" x2="0" y2="1">
@@ -1738,7 +1641,7 @@ export default function App() {
           )}
 
           {view === 'dashboard' && (
-            <DashboardPage key="dashboard" onLogout={handleLogout} />
+            <DashboardPage key="dashboard" onLogout={handleLogout} user={user} />
           )}
         </AnimatePresence>
 
