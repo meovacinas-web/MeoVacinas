@@ -39,6 +39,26 @@ import {
 } from 'lucide-react';
 import Logo from './components/Logo';
 import { 
+  db, 
+  auth, 
+  googleProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged, 
+  collection, 
+  addDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  deleteDoc, 
+  getDocs, 
+  doc, 
+  serverTimestamp,
+  handleFirestoreError,
+  OperationType,
+  User
+} from './firebase';
+import { 
   LineChart, 
   Line, 
   XAxis, 
@@ -55,6 +75,56 @@ import {
   Pie,
   Legend
 } from 'recharts';
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      let errorMessage = "Ocorreu um erro inesperado.";
+      try {
+        const parsedError = JSON.parse(this.state.error.message);
+        if (parsedError.error) {
+          errorMessage = `Erro no Firestore: ${parsedError.error} (${parsedError.operationType} em ${parsedError.path})`;
+        }
+      } catch (e) {
+        errorMessage = this.state.error.message || errorMessage;
+      }
+
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+          <div className="glass-card p-8 rounded-[32px] max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-serif mb-4">Ops! Algo deu errado</h2>
+            <p className="text-slate-600 mb-8 text-sm">{errorMessage}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all"
+            >
+              Recarregar Página
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Types
 type ViewState = 'home' | 'investigation' | 'history' | 'calendars' | 'form' | 'login' | 'dashboard';
@@ -179,34 +249,30 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('/api/surveys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          age: formData.age,
-          favor: formData.favor,
-          importance: formData.importance,
-          updated: formData.updated,
-          covid: formData.covid,
-          doses: formData.covid === 'Sim' ? formData.covid_doses : '-',
-          last_5_years: formData.last_5_years,
-          trust: formData.trust,
-          influence: formData.influence === 'Outros' ? formData.influence_other : formData.influence,
-          skipped: formData.skipped,
-          skipped_reason: formData.skipped_reason,
-          why_not_vax: formData.why_not_vax,
-          campaigns: formData.campaigns
-        })
-      });
+      const surveyData = {
+        age: formData.age,
+        favor: formData.favor,
+        importance: formData.importance,
+        updated: formData.updated,
+        covid: formData.covid,
+        doses: formData.covid === 'Sim' ? formData.covid_doses : '-',
+        last_5_years: formData.last_5_years,
+        trust: formData.trust,
+        influence: formData.influence === 'Outros' ? formData.influence_other : formData.influence,
+        skipped: formData.skipped,
+        skipped_reason: formData.skipped_reason || '',
+        why_not_vax: formData.why_not_vax || '',
+        campaigns: formData.campaigns,
+        created_at: serverTimestamp()
+      };
 
-      if (response.ok) {
-        alert('Obrigado por sua participação anônima!');
-        onComplete();
-      } else {
-        throw new Error('Falha ao enviar pesquisa');
-      }
+      await addDoc(collection(db, 'surveys'), surveyData);
+      
+      alert('Obrigado por sua participação anônima!');
+      onComplete();
     } catch (err) {
       console.error(err);
+      handleFirestoreError(err, OperationType.CREATE, 'surveys');
       alert('Erro ao enviar pesquisa. Tente novamente.');
     } finally {
       setIsSubmitting(false);
@@ -390,10 +456,34 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        onLogin();
+      }
+    });
+    return () => unsubscribe();
+  }, [onLogin]);
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      await signInWithPopup(auth, googleProvider);
+      onLogin();
+    } catch (err: any) {
+      console.error(err);
+      setError('Erro ao entrar com Google. Verifique se os popups estão permitidos.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple mock authentication
+    // Simple mock authentication for legacy support
     if (username === 'admin' && password === 'projeto2026') {
       onLogin();
     } else {
@@ -421,37 +511,57 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
         <h2 className="text-2xl font-serif text-center mb-2">Acesso Restrito</h2>
         <p className="text-slate-500 text-center text-sm mb-8">Área exclusiva para alunos do projeto</p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 ml-1">Usuário</label>
-            <input 
-              type="text" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
-              placeholder="admin"
-              required
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 ml-1">Senha</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+        <div className="space-y-6">
           <button 
-            type="submit"
-            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3"
           >
-            Entrar no Painel
+            <Globe className="w-5 h-5 text-vax-blue" />
+            {isLoading ? 'Conectando...' : 'Entrar com Google'}
           </button>
-        </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-slate-400">Ou use senha</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700 ml-1">Usuário</label>
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
+                placeholder="admin"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700 ml-1">Senha</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+            <button 
+              type="submit"
+              className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4"
+            >
+              Entrar no Painel
+            </button>
+          </form>
+        </div>
       </div>
     </motion.div>
   );
@@ -462,54 +572,21 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    let ws: WebSocket | null = null;
-    let reconnectTimeout: NodeJS.Timeout;
+    const q = query(collection(db, 'surveys'), orderBy('created_at', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setSurveys(data);
+      setIsConnected(true);
+    }, (error) => {
+      setIsConnected(false);
+      handleFirestoreError(error, OperationType.LIST, 'surveys');
+    });
 
-    const connect = () => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}`;
-      console.log('Attempting WebSocket connection to:', wsUrl);
-      
-      ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        console.log('WebSocket connected');
-        setIsConnected(true);
-      };
-
-      ws.onclose = (event) => {
-        console.log('WebSocket disconnected', event.code, event.reason);
-        setIsConnected(false);
-        // Attempt to reconnect after 3 seconds
-        reconnectTimeout = setTimeout(connect, 3000);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          if (message.type === 'INITIAL_DATA') {
-            setSurveys(message.data);
-          } else if (message.type === 'NEW_SURVEY') {
-            setSurveys(prev => [message.data, ...prev]);
-          }
-        } catch (e) {
-          console.error('Error parsing WebSocket message:', e);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error observed:', error);
-      };
-    };
-
-    connect();
-
-    return () => {
-      clearTimeout(reconnectTimeout);
-      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-        ws.close();
-      }
-    };
+    return () => unsubscribe();
   }, []);
 
   const [isResetting, setIsResetting] = useState(false);
@@ -563,21 +640,14 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
       if (confirm('Tem certeza que deseja apagar todas as respostas? Esta ação não pode ser desfeita.')) {
         setIsResetting(true);
         try {
-          const response = await fetch('/api/surveys/reset', { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-          });
+          const snapshot = await getDocs(collection(db, 'surveys'));
+          const deletePromises = snapshot.docs.map(d => deleteDoc(doc(db, 'surveys', d.id)));
+          await Promise.all(deletePromises);
           
-          if (response.ok) {
-            setSurveys([]);
-            alert('Dados resetados com sucesso!');
-          } else {
-            const data = await response.json();
-            alert(data.error || 'Erro ao resetar dados.');
-          }
+          alert('Dados resetados com sucesso!');
         } catch (err) {
           console.error(err);
+          handleFirestoreError(err, OperationType.DELETE, 'surveys');
           alert('Erro ao resetar dados.');
         } finally {
           setIsResetting(false);
@@ -1082,398 +1152,409 @@ export default function App() {
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setView('home');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Scroll to top when view changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
 
   return (
-    <div className="min-h-screen academic-grid overflow-x-hidden">
-      {/* Progress Bar */}
-      <motion.div 
-        className="fixed top-0 left-0 right-0 h-1 bg-vax-blue z-50 origin-left"
-        style={{ scaleX }}
-      />
+    <ErrorBoundary>
+      <div className="min-h-screen academic-grid overflow-x-hidden">
+        {/* Progress Bar */}
+        <motion.div 
+          className="fixed top-0 left-0 right-0 h-1 bg-vax-blue z-50 origin-left"
+          style={{ scaleX }}
+        />
 
-      <AnimatePresence mode="wait">
-        {view === 'home' && (
-          <motion.div
-            key="home"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Hero Section */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center py-20 px-6 text-center overflow-hidden">
-              <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                <motion.div 
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, 0]
-                  }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute top-1/4 -left-20 w-96 h-96 bg-vax-blue rounded-full blur-3xl"
-                />
-                <motion.div 
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, -5, 0]
-                  }}
-                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                  className="absolute bottom-1/4 -right-20 w-96 h-96 bg-vax-green rounded-full blur-3xl"
-                />
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="z-10 max-w-4xl flex flex-col items-center"
-              >
-                <Logo size={48} className="mb-8 drop-shadow-xl" />
-                <span className="inline-block px-4 py-1 mb-6 text-xs font-mono font-bold tracking-widest uppercase bg-vax-blue/10 text-vax-blue border border-vax-blue/20 rounded-full">
-                  No combate a desinformação
-                </span>
-                <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-tight text-balance">
-                  O Escudo da <span className="italic text-vax-blue">Humanidade</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-                  Explorando a ciência por trás da imunização e o perigo iminente do retrocesso informacional.
-                </p>
-                <div className="flex flex-wrap justify-center gap-6">
-                  <button 
-                    onClick={() => setView('investigation')}
-                    className="px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all flex items-center gap-2 group"
-                  >
-                    Começar Investigação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button 
-                    onClick={() => setView('history')}
-                    className="px-8 py-4 border border-slate-200 rounded-full font-medium hover:bg-white transition-all"
-                  >
-                    Ver Dados Históricos
-                  </button>
+        <AnimatePresence mode="wait">
+          {view === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {/* Hero Section */}
+              <section className="relative min-h-screen flex flex-col items-center justify-center py-20 px-6 text-center overflow-hidden">
+                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                  <motion.div 
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, 0]
+                    }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-1/4 -left-20 w-96 h-96 bg-vax-blue rounded-full blur-3xl"
+                  />
+                  <motion.div 
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, -5, 0]
+                    }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                    className="absolute bottom-1/4 -right-20 w-96 h-96 bg-vax-green rounded-full blur-3xl"
+                  />
                 </div>
-              </motion.div>
 
-              <motion.div 
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-400"
-              >
-                <ChevronDown className="w-8 h-8" />
-              </motion.div>
-            </section>
-
-            {/* The Science Section */}
-            <section className="py-24 px-6 max-w-7xl mx-auto">
-              <SectionTitle subtitle="Módulo 01: Imunologia Básica">Como as Vacinas Funcionam</SectionTitle>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: Microscope,
-                    title: "O Reconhecimento",
-                    desc: "A vacina apresenta ao corpo uma versão inofensiva do patógeno, permitindo que o sistema imunológico aprenda a identificá-lo sem o risco da doença.",
-                    color: "bg-sky-50 text-sky-500"
-                  },
-                  {
-                    icon: Dna,
-                    title: "A Resposta",
-                    desc: "O corpo produz anticorpos e células de memória. É como um treinamento militar para suas defesas naturais.",
-                    color: "bg-sky-50 text-sky-500"
-                  },
-                  {
-                    icon: ShieldPlus,
-                    title: "A Proteção",
-                    desc: "Se o vírus real tentar invadir, seu corpo já sabe exatamente como lutar, neutralizando a ameaça antes que ela cause danos.",
-                    color: "bg-sky-50 text-sky-500"
-                  }
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.2 }}
-                    className="glass-card p-6 md:p-8 rounded-3xl hover:shadow-2xl transition-all group"
-                  >
-                    <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                      <item.icon className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-serif mb-4">{item.title}</h3>
-                    <p className="text-slate-600 leading-relaxed">{item.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </section>
-
-            {/* Impact Chart Section */}
-            <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
-              <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <SectionTitle subtitle="Módulo 02: Epidemiologia" dark>O Triunfo da Ciência</SectionTitle>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                  <div>
-                    <p className="text-xl text-slate-300 mb-8 leading-relaxed">
-                      Ao longo do século XX, as vacinas erradicaram a varíola e quase eliminaram a poliomielite. O gráfico ao lado demonstra a correlação direta entre o aumento da taxa de vacinação e a queda drástica de casos.
-                    </p>
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-vax-blue/20 flex items-center justify-center text-vax-blue">
-                          <History className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold">Varíola: Erradicada</h4>
-                          <p className="text-slate-400 text-sm">A primeira doença humana a ser eliminada globalmente.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-vax-green/20 flex items-center justify-center text-vax-green">
-                          <Activity className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold">Poliomielite: -99%</h4>
-                          <p className="text-slate-400 text-sm">Redução massiva de paralisia infantil em todo o mundo.</p>
-                        </div>
-                      </div>
-                    </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="z-10 max-w-4xl flex flex-col items-center"
+                >
+                  <Logo size={48} className="mb-8 drop-shadow-xl" />
+                  <span className="inline-block px-4 py-1 mb-6 text-xs font-mono font-bold tracking-widest uppercase bg-vax-blue/10 text-vax-blue border border-vax-blue/20 rounded-full">
+                    No combate a desinformação
+                  </span>
+                  <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-tight text-balance">
+                    O Escudo da <span className="italic text-vax-blue">Humanidade</span>
+                  </h1>
+                  <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Explorando a ciência por trás da imunização e o perigo iminente do retrocesso informacional.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-6">
+                    <button 
+                      onClick={() => setView('investigation')}
+                      className="px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all flex items-center gap-2 group"
+                    >
+                      Começar Investigação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <button 
+                      onClick={() => setView('history')}
+                      className="px-8 py-4 border border-slate-200 rounded-full font-medium hover:bg-white transition-all"
+                    >
+                      Ver Dados Históricos
+                    </button>
                   </div>
+                </motion.div>
+
+                <motion.div 
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-400"
+                >
+                  <ChevronDown className="w-8 h-8" />
+                </motion.div>
+              </section>
+
+              {/* The Science Section */}
+              <section className="py-24 px-6 max-w-7xl mx-auto">
+                <SectionTitle subtitle="Módulo 01: Imunologia Básica">Como as Vacinas Funcionam</SectionTitle>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    {
+                      icon: Microscope,
+                      title: "O Reconhecimento",
+                      desc: "A vacina apresenta ao corpo uma versão inofensiva do patógeno, permitindo que o sistema imunológico aprenda a identificá-lo sem o risco da doença.",
+                      color: "bg-sky-50 text-sky-500"
+                    },
+                    {
+                      icon: Dna,
+                      title: "A Resposta",
+                      desc: "O corpo produz anticorpos e células de memória. É como um treinamento militar para suas defesas naturais.",
+                      color: "bg-sky-50 text-sky-500"
+                    },
+                    {
+                      icon: ShieldPlus,
+                      title: "A Proteção",
+                      desc: "Se o vírus real tentar invadir, seu corpo já sabe exatamente como lutar, neutralizando a ameaça antes que ela cause danos.",
+                      color: "bg-sky-50 text-sky-500"
+                    }
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.2 }}
+                      className="glass-card p-6 md:p-8 rounded-3xl hover:shadow-2xl transition-all group"
+                    >
+                      <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                        <item.icon className="w-8 h-8" />
+                      </div>
+                      <h3 className="text-2xl font-serif mb-4">{item.title}</h3>
+                      <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Impact Chart Section */}
+              <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                  <SectionTitle subtitle="Módulo 02: Epidemiologia" dark>O Triunfo da Ciência</SectionTitle>
                   
-                  <div className="h-[400px] bg-white/5 p-6 rounded-3xl border border-white/10">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={vaccinationData}>
-                        <defs>
-                          <linearGradient id="colorCases" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorVax" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                        <XAxis dataKey="year" stroke="#94a3b8" />
-                        <YAxis stroke="#94a3b8" />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px' }}
-                          itemStyle={{ color: '#fff' }}
-                        />
-                        <Area type="monotone" dataKey="cases" stroke="#ef4444" fillOpacity={1} fill="url(#colorCases)" name="Casos (Relativo)" />
-                        <Area type="monotone" dataKey="vaxRate" stroke="#10b981" fillOpacity={1} fill="url(#colorVax)" name="Taxa de Vacinação %" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                    <p className="text-center text-xs font-mono text-slate-500 mt-4">
-                      Fonte: Organização Mundial da Saúde (Dados Ilustrativos)
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* The Anti-Vax Regress Section */}
-            <section className="py-24 px-6 max-w-7xl mx-auto">
-              <SectionTitle subtitle="Módulo 03: Sociologia da Saúde">O Perigo do Retrocesso</SectionTitle>
-              
-              <div className="bg-vax-red/5 border border-vax-red/20 rounded-[40px] p-8 md:p-16 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <ShieldAlert className="w-64 h-64 text-vax-red" />
-                </div>
-                
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <div>
-                    <h3 className="text-4xl font-serif mb-6 text-slate-900">A Desinformação como Patógeno</h3>
-                    <p className="text-lg text-slate-700 mb-8 leading-relaxed">
-                      O movimento anti-vacina não é apenas uma escolha pessoal; é um ataque à <span className="font-bold">Imunidade de Rebanho</span>. Quando a cobertura vacinal cai abaixo de certos níveis (geralmente 95%), doenças que estavam controladas voltam a surgir.
-                    </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                      <p className="text-xl text-slate-300 mb-8 leading-relaxed">
+                        Ao longo do século XX, as vacinas erradicaram a varíola e quase eliminaram a poliomielite. O gráfico ao lado demonstra a correlação direta entre o aumento da taxa de vacinação e a queda drástica de casos.
+                      </p>
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-vax-blue/20 flex items-center justify-center text-vax-blue">
+                            <History className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold">Varíola: Erradicada</h4>
+                            <p className="text-slate-400 text-sm">A primeira doença humana a ser eliminada globalmente.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-vax-green/20 flex items-center justify-center text-vax-green">
+                            <Activity className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold">Poliomielite: -99%</h4>
+                            <p className="text-slate-400 text-sm">Redução massiva de paralisia infantil em todo o mundo.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     
-                    <div className="space-y-4">
-                      {[
-                        "Retorno do Sarampo em países desenvolvidos.",
-                        "Aumento da mortalidade infantil evitável.",
-                        "Sobrecarga desnecessária dos sistemas públicos de saúde.",
-                        "Ameaça direta a pessoas imunocomprometidas."
-                      ].map((text, i) => (
-                        <motion.div 
-                          key={i}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.1 }}
-                          className="flex items-center gap-3 text-slate-800"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-vax-red" />
-                          <span>{text}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                      <span className="text-4xl font-serif text-vax-red block mb-2">95%</span>
-                      <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">Mínimo para Imunidade de Rebanho</span>
-                    </div>
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                      <span className="text-4xl font-serif text-vax-red block mb-2">2019</span>
-                      <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">OMS declara anti-vax como ameaça global</span>
-                    </div>
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 sm:col-span-2">
-                      <p className="text-sm italic text-slate-600">
-                        "A hesitação vacinal ameaça reverter o progresso feito no combate a doenças evitáveis por vacinação."
+                    <div className="h-[400px] bg-white/5 p-6 rounded-3xl border border-white/10">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={vaccinationData}>
+                          <defs>
+                            <linearGradient id="colorCases" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                            </linearGradient>
+                            <linearGradient id="colorVax" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                          <XAxis dataKey="year" stroke="#94a3b8" />
+                          <YAxis stroke="#94a3b8" />
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px' }}
+                            itemStyle={{ color: '#fff' }}
+                          />
+                          <Area type="monotone" dataKey="cases" stroke="#ef4444" fillOpacity={1} fill="url(#colorCases)" name="Casos (Relativo)" />
+                          <Area type="monotone" dataKey="vaxRate" stroke="#10b981" fillOpacity={1} fill="url(#colorVax)" name="Taxa de Vacinação %" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                      <p className="text-center text-xs font-mono text-slate-500 mt-4">
+                        Fonte: Organização Mundial da Saúde (Dados Ilustrativos)
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            {/* Call to Action */}
-            <section className="py-24 px-6 text-center bg-vax-blue/5">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="max-w-3xl mx-auto"
-              >
-                <Users className="w-16 h-16 text-vax-blue mx-auto mb-8" />
-                <h2 className="font-serif text-5xl mb-6">Proteja o Futuro</h2>
-                <p className="text-xl text-slate-600 mb-12">
-                  A vacinação é um pacto social. Ao se vacinar, você protege não apenas a si mesmo, mas também aqueles que não podem ser vacinados por motivos médicos.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <button 
-                    onClick={() => setView('calendars')}
-                    className="px-10 py-4 bg-vax-blue text-white rounded-full font-bold hover:bg-vax-blue/90 transition-all shadow-lg shadow-vax-blue/20"
-                  >
-                    Calendários de Vacinação
-                  </button>
-                  <button 
-                    onClick={() => setView('form')}
-                    className="px-10 py-4 bg-white border border-vax-blue text-vax-blue rounded-full font-bold hover:bg-vax-blue/5 transition-all shadow-lg shadow-vax-blue/5"
-                  >
-                    Responder Formulário
-                  </button>
-                  <button 
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: 'Vacina & Saúde Pública',
-                          text: 'Confira este projeto sobre a importância da vacinação!',
-                          url: window.location.href,
-                        });
-                      } else {
-                        alert('Link copiado para a área de transferência!');
-                        navigator.clipboard.writeText(window.location.href);
-                      }
-                    }}
-                    className="px-10 py-4 bg-white border border-slate-200 rounded-full font-bold hover:bg-slate-50 transition-all"
-                  >
-                    Compartilhar Ciência
-                  </button>
+              {/* The Anti-Vax Regress Section */}
+              <section className="py-24 px-6 max-w-7xl mx-auto">
+                <SectionTitle subtitle="Módulo 03: Sociologia da Saúde">O Perigo do Retrocesso</SectionTitle>
+                
+                <div className="bg-vax-red/5 border border-vax-red/20 rounded-[40px] p-8 md:p-16 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <ShieldAlert className="w-64 h-64 text-vax-red" />
+                  </div>
+                  
+                  <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                      <h3 className="text-4xl font-serif mb-6 text-slate-900">A Desinformação como Patógeno</h3>
+                      <p className="text-lg text-slate-700 mb-8 leading-relaxed">
+                        O movimento anti-vacina não é apenas uma escolha pessoal; é um ataque à <span className="font-bold">Imunidade de Rebanho</span>. Quando a cobertura vacinal cai abaixo de certos níveis (geralmente 95%), doenças que estavam controladas voltam a surgir.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        {[
+                          "Retorno do Sarampo em países desenvolvidos.",
+                          "Aumento da mortalidade infantil evitável.",
+                          "Sobrecarga desnecessária dos sistemas públicos de saúde.",
+                          "Ameaça direta a pessoas imunocomprometidas."
+                        ].map((text, i) => (
+                          <motion.div 
+                            key={i}
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.1 }}
+                            className="flex items-center gap-3 text-slate-800"
+                          >
+                            <div className="w-2 h-2 rounded-full bg-vax-red" />
+                            <span>{text}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <span className="text-4xl font-serif text-vax-red block mb-2">95%</span>
+                        <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">Mínimo para Imunidade de Rebanho</span>
+                      </div>
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <span className="text-4xl font-serif text-vax-red block mb-2">2019</span>
+                        <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">OMS declara anti-vax como ameaça global</span>
+                      </div>
+                      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 sm:col-span-2">
+                        <p className="text-sm italic text-slate-600">
+                          "A hesitação vacinal ameaça reverter o progresso feito no combate a doenças evitáveis por vacinação."
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
-            </section>
-          </motion.div>
-        )}
+              </section>
 
-        {view === 'form' && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="pt-32 pb-24 px-6 max-w-4xl mx-auto"
-          >
-            <button 
-              onClick={() => setView('home')}
-              className="flex items-center gap-2 text-vax-blue font-bold mb-12 hover:gap-3 transition-all"
+              {/* Call to Action */}
+              <section className="py-24 px-6 text-center bg-vax-blue/5">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  className="max-w-3xl mx-auto"
+                >
+                  <Users className="w-16 h-16 text-vax-blue mx-auto mb-8" />
+                  <h2 className="font-serif text-5xl mb-6">Proteja o Futuro</h2>
+                  <p className="text-xl text-slate-600 mb-12">
+                    A vacinação é um pacto social. Ao se vacinar, você protege não apenas a si mesmo, mas também aqueles que não podem ser vacinados por motivos médicos.
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-4">
+                    <button 
+                      onClick={() => setView('calendars')}
+                      className="px-10 py-4 bg-vax-blue text-white rounded-full font-bold hover:bg-vax-blue/90 transition-all shadow-lg shadow-vax-blue/20"
+                    >
+                      Calendários de Vacinação
+                    </button>
+                    <button 
+                      onClick={() => setView('form')}
+                      className="px-10 py-4 bg-white border border-vax-blue text-vax-blue rounded-full font-bold hover:bg-vax-blue/5 transition-all shadow-lg shadow-vax-blue/5"
+                    >
+                      Responder Formulário
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: 'Vacina & Saúde Pública',
+                            text: 'Confira este projeto sobre a importância da vacinação!',
+                            url: window.location.href,
+                          });
+                        } else {
+                          alert('Link copiado para a área de transferência!');
+                          navigator.clipboard.writeText(window.location.href);
+                        }
+                      }}
+                      className="px-10 py-4 bg-white border border-slate-200 rounded-full font-bold hover:bg-slate-50 transition-all"
+                    >
+                      Compartilhar Ciência
+                    </button>
+                  </div>
+                </motion.div>
+              </section>
+            </motion.div>
+          )}
+
+          {view === 'form' && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="pt-32 pb-24 px-6 max-w-4xl mx-auto"
             >
-              <ArrowLeft className="w-5 h-5" /> Voltar para o Início
-            </button>
+              <button 
+                onClick={() => setView('home')}
+                className="flex items-center gap-2 text-vax-blue font-bold mb-12 hover:gap-3 transition-all"
+              >
+                <ArrowLeft className="w-5 h-5" /> Voltar para o Início
+              </button>
 
-            <div className="glass-card p-8 md:p-12 rounded-[40px] shadow-2xl">
-              <SectionTitle subtitle="Pesquisa de Opinião Anônima">Formulário de Conscientização</SectionTitle>
-              <p className="text-slate-600 mb-12">
-                Sua participação é anônima e fundamental para entendermos a percepção pública sobre a vacinação.
-              </p>
+              <div className="glass-card p-8 md:p-12 rounded-[40px] shadow-2xl">
+                <SectionTitle subtitle="Pesquisa de Opinião Anônima">Formulário de Conscientização</SectionTitle>
+                <p className="text-slate-600 mb-12">
+                  Sua participação é anônima e fundamental para entendermos a percepção pública sobre a vacinação.
+                </p>
 
-              <SurveyForm onComplete={() => setView('home')} />
-            </div>
-          </motion.div>
-        )}
+                <SurveyForm onComplete={() => setView('home')} />
+              </div>
+            </motion.div>
+          )}
 
-        {view === 'investigation' && (
-          <InvestigationPage key="investigation" onBack={() => setView('home')} />
-        )}
+          {view === 'investigation' && (
+            <InvestigationPage key="investigation" onBack={() => setView('home')} />
+          )}
 
-        {view === 'history' && (
-          <HistoryPage key="history" onBack={() => setView('home')} />
-        )}
+          {view === 'history' && (
+            <HistoryPage key="history" onBack={() => setView('home')} />
+          )}
 
-        {view === 'calendars' && (
-          <CalendarsPage key="calendars" onBack={() => setView('home')} />
-        )}
+          {view === 'calendars' && (
+            <CalendarsPage key="calendars" onBack={() => setView('home')} />
+          )}
 
-        {view === 'login' && (
-          <LoginPage key="login" onLogin={() => setView('dashboard')} onBack={() => setView('home')} />
-        )}
+          {view === 'login' && (
+            <LoginPage key="login" onLogin={() => setView('dashboard')} onBack={() => setView('home')} />
+          )}
 
-        {view === 'dashboard' && (
-          <DashboardPage key="dashboard" onLogout={() => setView('home')} />
-        )}
-      </AnimatePresence>
+          {view === 'dashboard' && (
+            <DashboardPage key="dashboard" onLogout={handleLogout} />
+          )}
+        </AnimatePresence>
 
-      {/* Footer */}
-      <footer className="pt-20 pb-10 px-6 border-t border-slate-100 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-2">
-              <Logo size={32} className="mb-6" />
-              <p className="text-slate-500 max-w-sm leading-relaxed">
-                Uma iniciativa dedicada a combater a desinformação através da ciência, 
-                promovendo a saúde pública e a conscientização sobre a importância vital da vacinação.
-              </p>
+        {/* Footer */}
+        <footer className="pt-20 pb-10 px-6 border-t border-slate-100 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+              <div className="col-span-1 md:col-span-2">
+                <Logo size={32} className="mb-6" />
+                <p className="text-slate-500 max-w-sm leading-relaxed">
+                  Uma iniciativa dedicada a combater a desinformação através da ciência, 
+                  promovendo a saúde pública e a conscientização sobre a importância vital da vacinação.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Navegação</h4>
+                <ul className="space-y-4 text-sm text-slate-500">
+                  <li><button onClick={() => setView('home')} className="hover:text-vax-blue transition-colors">Início</button></li>
+                  <li><button onClick={() => setView('investigation')} className="hover:text-vax-blue transition-colors">Investigação Científica</button></li>
+                  <li><button onClick={() => setView('history')} className="hover:text-vax-blue transition-colors">Dados Históricos</button></li>
+                  <li><button onClick={() => setView('calendars')} className="hover:text-vax-blue transition-colors">Calendários Oficiais</button></li>
+                  <li><button onClick={() => setView('login')} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-vax-blue transition-all mt-4">Acesso Alunos</button></li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Recursos</h4>
+                <ul className="space-y-4 text-sm text-slate-500">
+                  <li><a href="https://www.gov.br/saude/pt-br" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">Ministério da Saúde</a></li>
+                  <li><a href="https://www.who.int" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OMS</a></li>
+                  <li><a href="https://www.paho.org/pt/brasil" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OPAS</a></li>
+                </ul>
+              </div>
             </div>
             
-            <div>
-              <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Navegação</h4>
-              <ul className="space-y-4 text-sm text-slate-500">
-                <li><button onClick={() => setView('home')} className="hover:text-vax-blue transition-colors">Início</button></li>
-                <li><button onClick={() => setView('investigation')} className="hover:text-vax-blue transition-colors">Investigação Científica</button></li>
-                <li><button onClick={() => setView('history')} className="hover:text-vax-blue transition-colors">Dados Históricos</button></li>
-                <li><button onClick={() => setView('calendars')} className="hover:text-vax-blue transition-colors">Calendários Oficiais</button></li>
-                <li><button onClick={() => setView('login')} className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-vax-blue transition-all mt-4">Acesso Alunos</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Recursos</h4>
-              <ul className="space-y-4 text-sm text-slate-500">
-                <li><a href="https://www.gov.br/saude/pt-br" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">Ministério da Saúde</a></li>
-                <li><a href="https://www.who.int" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OMS</a></li>
-                <li><a href="https://www.paho.org/pt/brasil" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OPAS</a></li>
-              </ul>
+            <div className="pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-vax-green animate-pulse" />
+                @2026 Feito por pessoas que amam a ciência
+              </div>
+              
+              <div className="flex gap-6">
+                <button className="text-slate-400 hover:text-vax-blue transition-colors">
+                  <Globe className="w-5 h-5" />
+                </button>
+                <button className="text-slate-400 hover:text-vax-blue transition-colors">
+                  <Heart className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
-          
-          <div className="pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-vax-green animate-pulse" />
-              @2026 Feito por pessoas que amam a ciência
-            </div>
-            
-            <div className="flex gap-6">
-              <button className="text-slate-400 hover:text-vax-blue transition-colors">
-                <Globe className="w-5 h-5" />
-              </button>
-              <button className="text-slate-400 hover:text-vax-blue transition-colors">
-                <Heart className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </ErrorBoundary>
   );
 }
