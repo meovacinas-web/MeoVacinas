@@ -512,8 +512,12 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
       await signInWithPopup(auth, googleProvider);
       onLogin();
     } catch (err: any) {
-      console.error(err);
-      setError('Erro ao entrar com Google. Verifique se os popups estão permitidos.');
+      console.error('Erro no login:', err);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domínio não autorizado. Adicione "meovacinas-web.github.io" e os domínios do AI Studio aos "Domínios Autorizados" no Console do Firebase (Autenticação > Configurações).');
+      } else {
+        setError('Erro ao entrar com Google. Verifique se os popups estão permitidos ou se o domínio está autorizado no Firebase.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -840,12 +844,12 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div className="lg:col-span-2 glass-card p-8 rounded-[32px] shadow-xl">
+        <div className="lg:col-span-2 glass-card p-8 rounded-[32px] shadow-xl min-w-0">
           <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
             <Activity className="w-5 h-5 text-vax-blue" /> Distribuição de Idade
           </h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <BarChart data={ageChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
@@ -857,12 +861,12 @@ const DashboardPage = ({ onLogout }: { onLogout: () => void, key?: string }) => 
           </div>
         </div>
 
-        <div className="glass-card p-8 rounded-[32px] shadow-xl">
+        <div className="glass-card p-8 rounded-[32px] shadow-xl min-w-0">
           <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
             <PieChartIcon className="w-5 h-5 text-vax-green" /> Opinião sobre Vacinas
           </h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
                   data={favorChartData}
