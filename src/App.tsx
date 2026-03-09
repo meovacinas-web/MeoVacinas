@@ -496,33 +496,62 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        onLogin();
-      }
-    });
-    return () => unsubscribe();
-  }, [onLogin]);
+ useEffect(() => {
+  console.log('Iniciando monitoramento...');
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      await signInWithPopup(auth, googleProvider);
-      onLogin();
-    } catch (err: any) {
-      console.error('Erro no login:', err);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError('Domínio não autorizado. Adicione "meovacinas-web.github.io" e os domínios do AI Studio aos "Domínios Autorizados" no Console do Firebase (Autenticação > Configurações).');
-      } else {
-        setError('Erro ao entrar com Google. Verifique se os popups estão permitidos ou se o domínio está autorizado no Firebase.');
-      }
-    } finally {
+  const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+
+    if (!user) {
+      console.warn("Usuário não autenticado.");
+      setPermissionError("Faça login para ver os dados.");
       setIsLoading(false);
+      return;
     }
-  };
 
+    console.log("Usuário autenticado:", user.email);
+
+    const q = query(
+      collection(db, "surveys"),
+      orderBy("created_at", "desc")
+    );
+
+    const unsubscribeSnapshot = onSnapshot(
+      q,
+      (snapshot) => {
+
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        console.log("Pesquisas carregadas:", data.length);
+
+        setSurveys(data);
+        setIsConnected(true);
+        setIsLoading(false);
+        setPermissionError(null);
+      },
+      (error) => {
+
+        console.error("Erro Firestore:", error);
+
+        setIsConnected(false);
+        setIsLoading(false);
+
+        if (error.code === "permission-denied") {
+          setPermissionError(
+            "Acesso negado. Verifique as regras do Firestore."
+          );
+        }
+      }
+    );
+
+    return () => unsubscribeSnapshot();
+  });
+
+  return () => unsubscribeAuth();
+
+}, []);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
