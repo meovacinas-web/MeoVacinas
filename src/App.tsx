@@ -643,7 +643,8 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
     } catch (err: any) {
       console.error('Erro no login:', err);
       if (err.code === 'auth/unauthorized-domain') {
-        setError('Domínio não autorizado. Adicione "meovacinas-web.github.io" e os domínios do AI Studio aos "Domínios Autorizados" no Console do Firebase (Autenticação > Configurações).');
+        const currentDomain = window.location.hostname;
+        setError(`Domínio "${currentDomain}" não autorizado. Vá ao Console do Firebase > Autenticação > Configurações > Domínios Autorizados e adicione: "${currentDomain}" e "meovacinas-web.github.io".`);
       } else {
         setError('Erro ao entrar com Google. Verifique se os popups estão permitidos ou se o domínio está autorizado no Firebase.');
       }
