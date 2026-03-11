@@ -35,8 +35,11 @@ import {
   Lock,
   LogOut,
   PieChart as PieChartIcon,
-  LayoutDashboard
+  LayoutDashboard,
+  Instagram,
+  QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import Logo from './components/Logo';
 import { 
   db, 
@@ -162,6 +165,111 @@ const diseaseEradicationData = [
   { name: 'Rubéola', reduction: 97, year: 2018 },
   { name: 'Tétano', reduction: 92, year: 2020 },
 ];
+
+const InstagramQRCode = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[100]">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            className="absolute bottom-20 right-0 bg-white p-6 rounded-[32px] shadow-2xl border border-vax-blue/20 w-64"
+          >
+            {/* Vaccine Theme Animations */}
+            <div className="absolute -top-4 -left-4">
+              <motion.div
+                animate={{ y: [0, -10, 0], rotate: [0, 10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="bg-vax-blue/10 p-2 rounded-full text-vax-blue shadow-sm"
+              >
+                <Syringe className="w-6 h-6" />
+              </motion.div>
+            </div>
+            <div className="absolute -bottom-4 -right-4">
+              <motion.div
+                animate={{ y: [0, 10, 0], rotate: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="bg-vax-green/10 p-2 rounded-full text-vax-green shadow-sm"
+              >
+                <ShieldCheck className="w-6 h-6" />
+              </motion.div>
+            </div>
+
+            <div className="text-center mb-4">
+              <h4 className="font-serif text-lg font-bold text-slate-900">Siga-nos!</h4>
+              <p className="text-xs text-slate-500">Siga, compartilhe e leve saúde ao mundo!</p>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-2xl flex justify-center border border-slate-100">
+              <QRCodeSVG 
+                value="https://www.instagram.com/meovacinas/" 
+                size={160}
+                fgColor="#0f172a"
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2 text-vax-blue font-bold text-sm hover:scale-105 transition-transform">
+              <Instagram className="w-4 h-4" /> @meovacinas
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="absolute bottom-20 right-0 flex flex-col items-center gap-2 pointer-events-none"
+          >
+            <motion.span 
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-[10px] font-mono font-bold text-vax-blue uppercase tracking-widest whitespace-nowrap bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full border border-vax-blue/10 shadow-sm"
+            >
+              Siga-nos
+            </motion.span>
+            <motion.div
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="text-vax-blue"
+            >
+              <ChevronDown className="w-5 h-5" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-16 h-16 bg-vax-blue text-white rounded-full shadow-lg shadow-vax-blue/30 flex items-center justify-center relative overflow-hidden group"
+      >
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          className="z-10"
+        >
+          {isOpen ? <ArrowLeft className="w-6 h-6" /> : <QrCode className="w-6 h-6" />}
+        </motion.div>
+        
+        {/* Animated background pulse */}
+        <motion.div
+          animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute inset-0 bg-white/20 rounded-full"
+        />
+      </motion.button>
+    </div>
+  );
+};
 
 const calendarsData = [
   {
@@ -514,8 +622,6 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
 // --- SUB-PAGES ---
 
 const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => void, key?: string }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -546,31 +652,6 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      // Map "admin" username to a real Firebase email
-      const email = username.toLowerCase() === 'admin' ? 'admin@meovacinas.com.br' : username;
-      
-      await signInWithEmailAndPassword(auth, email, password);
-      onLogin();
-    } catch (err: any) {
-      console.error('Erro no login por senha:', err);
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError('Usuário ou senha incorretos. Verifique as credenciais.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Formato de e-mail inválido. Use "admin" ou um e-mail válido.');
-      } else {
-        setError('Erro ao autenticar. Verifique sua conexão ou se o usuário foi criado no Firebase.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -595,57 +676,18 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
           <button 
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3"
+            className="w-full py-6 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 text-lg"
           >
-            <Globe className="w-5 h-5 text-vax-blue" />
+            <Globe className="w-6 h-6 text-vax-blue" />
             {isLoading ? 'Conectando...' : 'Entrar com Google'}
           </button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-400">Ou use senha</span>
-            </div>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Usuário</label>
-              <input 
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
-                placeholder="admin"
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 ml-1">Senha</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-vax-blue outline-none transition-all"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
-            <p className="text-[10px] text-slate-400 text-center mt-2">
-              Nota: Este é um acesso seguro via Firebase. 
-              O usuário deve estar previamente cadastrado no console do projeto.
-            </p>
-            <button 
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all shadow-lg mt-4 flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {isLoading ? 'Autenticando...' : 'Entrar no Painel'}
-            </button>
-          </form>
+          {error && <p className="text-xs text-red-500 text-center mt-4">{error}</p>}
+          
+          <p className="text-[10px] text-slate-400 text-center mt-6 leading-relaxed">
+            Nota: Este é um acesso seguro via Firebase. 
+            O seu e-mail do Google deve estar autorizado no console do projeto para visualizar os dados.
+          </p>
         </div>
       </div>
     </motion.div>
@@ -912,8 +954,8 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
             <Activity className="w-5 h-5 text-vax-blue" /> Distribuição de Idade
           </h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <div className="h-[300px] w-full relative">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
               <BarChart data={ageChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
@@ -929,8 +971,8 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
             <PieChartIcon className="w-5 h-5 text-vax-green" /> Opinião sobre Vacinas
           </h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <div className="h-[300px] w-full relative">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
               <PieChart>
                 <Pie
                   data={favorChartData}
@@ -963,8 +1005,8 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                 <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700">
                   {field.icon} {field.label}
                 </h4>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <div className="h-[200px] relative">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                     {field.type === 'bar' ? (
                       <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -1301,11 +1343,11 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
     <SectionTitle subtitle="Arquivo Histórico">O Impacto em Números</SectionTitle>
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
-      <div className="h-[400px] md:h-[500px] glass-card p-6 md:p-8 rounded-[40px]">
+      <div className="h-[400px] md:h-[500px] glass-card p-6 md:p-8 rounded-[40px] relative">
         <h3 className="text-2xl font-serif mb-8 flex items-center gap-3">
           <Database className="w-6 h-6 text-vax-blue" /> Redução de Doenças (%)
         </h3>
-        <ResponsiveContainer width="100%" height="80%" minWidth={0}>
+        <ResponsiveContainer width="100%" height="80%" minWidth={0} debounce={100}>
           <BarChart data={diseaseEradicationData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
             <XAxis type="number" domain={[0, 100]} stroke="#94a3b8" />
@@ -1402,6 +1444,8 @@ export default function App() {
           className="fixed top-0 left-0 right-0 h-1 bg-vax-blue z-50 origin-left"
           style={{ scaleX }}
         />
+
+        <InstagramQRCode />
 
         <AnimatePresence mode="wait">
           {view === 'home' && (
@@ -1548,8 +1592,8 @@ export default function App() {
                       </div>
                     </div>
                     
-                    <div className="h-[400px] bg-white/5 p-6 rounded-3xl border border-white/10">
-                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <div className="h-[400px] bg-white/5 p-6 rounded-3xl border border-white/10 relative">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                         <AreaChart data={vaccinationData}>
                           <defs>
                             <linearGradient id="colorCases" x1="0" y1="0" x2="0" y2="1">
@@ -1769,15 +1813,6 @@ export default function App() {
               <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-vax-green animate-pulse" />
                 @2026 Feito por pessoas que amam a ciência
-              </div>
-              
-              <div className="flex gap-6">
-                <button className="text-slate-400 hover:text-vax-blue transition-colors">
-                  <Globe className="w-5 h-5" />
-                </button>
-                <button className="text-slate-400 hover:text-vax-blue transition-colors">
-                  <Heart className="w-5 h-5" />
-                </button>
               </div>
             </div>
           </div>

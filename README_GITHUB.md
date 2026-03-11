@@ -37,7 +37,3 @@ Se o site aparecer em branco no GitHub Pages, verifique:
 4. **Case Sensitivity:** O nome da pasta no GitHub (`MeoVacinas`) deve ser idêntico ao configurado no `base` do `vite.config.ts`.
 5. **Firebase Authorized Domains:** Certifique-se de que o domínio do GitHub Pages (`meovacinas-web.github.io`) esteja autorizado no console do Firebase (Authentication > Settings > Authorized domains).
 6. **Configuração do GitHub Pages:** No seu repositório no GitHub, vá em **Settings > Pages** e verifique se o "Source" está configurado para o branch `gh-pages` (se usou o script de deploy) ou para a pasta `/docs` ou branch principal se fez o upload manual.
-
-4. **Case Sensitivity:** O nome da pasta no GitHub (`MeoVacinas`) deve ser idêntico ao configurado no `base` do `vite.config.ts`.
-5. **Firebase Authorized Domains:** Certifique-se de que o domínio do GitHub Pages (`meovacinas-web.github.io`) esteja autorizado no console do Firebase (Authentication > Settings > Authorized domains).
-6. **Configuração do GitHub Pages:** No seu repositório no GitHub, vá em **Settings > Pages** e verifique se o "Source" está configurado para o branch `gh-pages` (se usou o script de deploy) ou para a pasta `/docs` ou branch principal se fez o upload manual.
