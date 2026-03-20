@@ -329,18 +329,6 @@ const Formulario = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Logo size={32} />
-          <button 
-            onClick={() => navigate('/')}
-            className="text-slate-600 hover:text-vax-blue font-bold transition-colors"
-          >
-            Início
-          </button>
-        </div>
-      </nav>
-
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}

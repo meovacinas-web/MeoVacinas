@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Logo from './components/Logo';
+import { Navbar } from './components/Navbar';
 import { 
   db, 
   auth, 
@@ -1190,6 +1191,7 @@ function AppContent() {
         />
 
         <InstagramQRCode />
+        <Navbar user={user} onLogout={handleLogout} />
 
         <AnimatePresence mode="wait">
           <motion.div 
