@@ -14,7 +14,7 @@
 
 @layer base {
   body {
-    @apply bg-vax-paper text-slate-900 font-sans antialiased;
+    @apply bg-vax-paper text-slate-900 font-sans antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
   }
 }
 
@@ -23,8 +23,16 @@
   background-size: 40px 40px;
 }
 
+.dark .academic-grid {
+  background-image: radial-gradient(circle at 1px 1px, #1e293b 1px, transparent 0);
+}
+
 .glass-card {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl transition-all;
+}
+
+.dark .glass-card {
+  @apply bg-slate-900/70 border-white/10 shadow-2xl;
 }
 
 .text-balance {

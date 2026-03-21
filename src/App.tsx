@@ -132,16 +132,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
           <div className="glass-card p-8 rounded-[32px] max-w-md w-full text-center">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-serif mb-4">Ops! Algo deu errado</h2>
-            <p className="text-slate-600 mb-8 text-sm">{errorMessage}</p>
+            <h2 className="text-2xl font-serif mb-4 dark:text-white">Ops! Algo deu errado</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 text-sm">{errorMessage}</p>
             <button 
               onClick={() => window.location.reload()}
-              className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-vax-blue transition-all"
+              className="w-full py-4 bg-slate-900 dark:bg-vax-blue text-white rounded-xl font-bold hover:bg-vax-blue dark:hover:bg-vax-blue/90 transition-all"
             >
               Recarregar Página
             </button>
@@ -188,14 +188,14 @@ const InstagramQRCode = () => {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="absolute bottom-20 right-0 bg-white p-6 rounded-[32px] shadow-2xl border border-vax-blue/20 w-64"
+            className="absolute bottom-20 right-0 bg-white dark:bg-slate-900 p-6 rounded-[32px] shadow-2xl border border-vax-blue/20 w-64"
           >
             {/* Vaccine Theme Animations */}
             <div className="absolute -top-4 -left-4">
               <motion.div
                 animate={{ y: [0, -10, 0], rotate: [0, 10, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="bg-vax-blue/10 p-2 rounded-full text-vax-blue shadow-sm"
+                className="bg-vax-blue/10 dark:bg-vax-blue/20 p-2 rounded-full text-vax-blue shadow-sm"
               >
                 <Syringe className="w-6 h-6" />
               </motion.div>
@@ -204,22 +204,23 @@ const InstagramQRCode = () => {
               <motion.div
                 animate={{ y: [0, 10, 0], rotate: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity }}
-                className="bg-vax-green/10 p-2 rounded-full text-vax-green shadow-sm"
+                className="bg-vax-green/10 dark:bg-vax-green/20 p-2 rounded-full text-vax-green shadow-sm"
               >
                 <ShieldCheck className="w-6 h-6" />
               </motion.div>
             </div>
 
             <div className="text-center mb-4">
-              <h4 className="font-serif text-lg font-bold text-slate-900">Siga-nos!</h4>
-              <p className="text-xs text-slate-500">Siga, compartilhe e leve saúde ao mundo!</p>
+              <h4 className="font-serif text-lg font-bold text-slate-900 dark:text-white">Siga-nos!</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Siga, compartilhe e leve saúde ao mundo!</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-2xl flex justify-center border border-slate-100">
+            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex justify-center border border-slate-100 dark:border-white/10">
               <QRCodeSVG 
                 value="https://www.instagram.com/meovacinas/" 
                 size={160}
-                fgColor="#0f172a"
+                fgColor="currentColor"
+                className="text-slate-900 dark:text-white"
                 level="H"
                 includeMargin={true}
               />
@@ -243,7 +244,7 @@ const InstagramQRCode = () => {
             <motion.span 
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="text-[10px] font-mono font-bold text-vax-blue uppercase tracking-widest whitespace-nowrap bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full border border-vax-blue/10 shadow-sm"
+              className="text-[10px] font-mono font-bold text-vax-blue uppercase tracking-widest whitespace-nowrap bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-2 py-1 rounded-full border border-vax-blue/10 shadow-sm"
             >
               Siga-nos
             </motion.span>
@@ -336,7 +337,7 @@ const SectionTitle = ({ children, subtitle, dark = false }: { children: React.Re
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className={`font-serif text-4xl md:text-5xl lg:text-6xl mb-4 ${dark ? 'text-white' : 'text-slate-900'}`}
+      className={`font-serif text-4xl md:text-5xl lg:text-6xl mb-4 ${dark ? 'text-white' : 'text-slate-900 dark:text-white'}`}
     >
       {children}
     </motion.h2>
@@ -346,7 +347,7 @@ const SectionTitle = ({ children, subtitle, dark = false }: { children: React.Re
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
-        className={`font-mono text-sm uppercase tracking-widest ${dark ? 'text-slate-400' : 'text-slate-500'}`}
+        className={`font-mono text-sm uppercase tracking-widest ${dark ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}
       >
         {subtitle}
       </motion.p>
@@ -400,18 +401,18 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
         <ArrowLeft className="w-5 h-5" /> Voltar
       </button>
 
-      <div className="glass-card p-8 rounded-[32px] shadow-2xl border border-white/20">
-        <div className="w-16 h-16 bg-vax-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <div className="glass-card p-8 rounded-[32px] shadow-2xl border border-white/20 dark:border-white/10">
+        <div className="w-16 h-16 bg-vax-blue/10 dark:bg-vax-blue/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Lock className="w-8 h-8 text-vax-blue" />
         </div>
-        <h2 className="text-2xl font-serif text-center mb-2">Acesso Restrito</h2>
-        <p className="text-slate-500 text-center text-sm mb-8">Área exclusiva para alunos do projeto</p>
+        <h2 className="text-2xl font-serif text-center mb-2 dark:text-white">Acesso Restrito</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-center text-sm mb-8">Área exclusiva para alunos do projeto</p>
 
         <div className="space-y-6">
           <button 
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full py-6 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 text-lg"
+            className="w-full py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-2xl font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center justify-center gap-3 text-lg"
           >
             <Globe className="w-6 h-6 text-vax-blue" />
             {isLoading ? 'Conectando...' : 'Entrar com Google'}
@@ -429,7 +430,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   );
 };
 
-const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | null, key?: string }) => {
+const DashboardPage = ({ onLogout, user, isDarkMode }: { onLogout: () => void, user: User | null, isDarkMode: boolean, key?: string }) => {
   const [surveys, setSurveys] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -616,7 +617,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
     return (
       <div className="pt-32 pb-24 px-6 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="w-16 h-16 border-4 border-vax-blue/20 border-t-vax-blue rounded-full animate-spin mb-6"></div>
-        <p className="text-slate-500 font-mono text-sm animate-pulse">Conectando ao banco de dados em tempo real...</p>
+        <p className="text-slate-500 dark:text-slate-400 font-mono text-sm animate-pulse">Conectando ao banco de dados em tempo real...</p>
       </div>
     );
   }
@@ -624,17 +625,17 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
   if (permissionError) {
     return (
       <div className="pt-32 pb-24 px-6 flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto text-center">
-        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mb-8">
+        <div className="w-20 h-20 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-3xl flex items-center justify-center mb-8">
           <ShieldAlert className="w-10 h-10" />
         </div>
-        <h2 className="text-3xl font-serif mb-4">Acesso Restrito</h2>
-        <p className="text-slate-600 mb-10 leading-relaxed">
+        <h2 className="text-3xl font-serif mb-4 text-slate-900 dark:text-white">Acesso Restrito</h2>
+        <p className="text-slate-700 dark:text-slate-400 mb-10 leading-relaxed">
           {permissionError}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
           <button 
             onClick={onLogout}
-            className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-vax-blue transition-all shadow-lg flex items-center justify-center gap-2"
+            className="px-8 py-4 bg-slate-900 dark:bg-vax-blue text-white rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-vax-blue/90 transition-all shadow-lg flex items-center justify-center gap-2"
           >
             <LogOut className="w-5 h-5" /> Sair e Entrar com Google
           </button>
@@ -653,11 +654,11 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
         <div>
           <div className="flex items-center gap-3 mb-2">
             <LayoutDashboard className="w-6 h-6 text-vax-blue" />
-            <h1 className="text-3xl font-serif">Painel do Projeto</h1>
+            <h1 className="text-3xl font-serif dark:text-white">Painel do Projeto</h1>
           </div>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-vax-green animate-pulse' : 'bg-red-500'}`} />
-            <p className="text-slate-500 text-sm">{isConnected ? 'Monitoramento em tempo real ativo' : 'Desconectado do servidor'}</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">{isConnected ? 'Monitoramento em tempo real ativo' : 'Desconectado do servidor'}</p>
           </div>
         </div>
         
@@ -665,20 +666,20 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           <button 
             onClick={() => setShowResetModal(true)}
             disabled={isResetting}
-            className={`flex items-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-xl font-bold transition-all shadow-sm ${isResetting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50 hover:scale-[1.02] active:scale-[0.95]'}`}
+            className={`flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/30 text-red-600 rounded-xl font-bold transition-all shadow-sm ${isResetting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50 dark:hover:bg-red-900/10 hover:scale-[1.02] active:scale-[0.95]'}`}
           >
             <ShieldAlert className={`w-5 h-5 ${isResetting ? 'animate-spin' : ''}`} /> 
             Resetar Dados
           </button>
           <button 
             onClick={downloadData}
-            className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.95] transition-all shadow-sm"
+            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.95] transition-all shadow-sm dark:text-white"
           >
             <Download className="w-5 h-5" /> Baixar Dados (CSV)
           </button>
           <button 
             onClick={onLogout}
-            className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 hover:scale-[1.02] active:scale-[0.95] transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-bold hover:bg-red-100 dark:hover:bg-red-900/30 hover:scale-[1.02] active:scale-[0.95] transition-all"
           >
             <LogOut className="w-5 h-5" /> Sair
           </button>
@@ -687,16 +688,20 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div className="lg:col-span-2 glass-card p-8 rounded-[32px] shadow-xl min-w-0">
-          <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
+          <h3 className="text-xl font-bold mb-8 flex items-center gap-2 dark:text-white">
             <Activity className="w-5 h-5 text-vax-blue" /> Distribuição de Idade
           </h3>
           <div className="h-[300px] w-full relative">
             <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
               <BarChart data={ageChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "#334155" : "#f1f5f9"} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} stroke={isDarkMode ? "#94a3b8" : "#64748b"} />
+                <YAxis axisLine={false} tickLine={false} stroke={isDarkMode ? "#94a3b8" : "#64748b"} />
+                <Tooltip 
+                  cursor={{fill: isDarkMode ? 'rgba(14, 165, 233, 0.1)' : '#f8fafc'}} 
+                  contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                  itemStyle={{ color: isDarkMode ? '#fff' : '#000' }}
+                />
                 <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -704,7 +709,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
         </div>
 
         <div className="glass-card p-8 rounded-[32px] shadow-xl min-w-0">
-          <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
+          <h3 className="text-xl font-bold mb-8 flex items-center gap-2 dark:text-white">
             <PieChartIcon className="w-5 h-5 text-vax-green" /> Opinião sobre Vacinas
           </h3>
           <div className="h-[300px] w-full relative">
@@ -723,8 +728,11 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{borderRadius: '12px', border: 'none'}} />
-                <Legend verticalAlign="bottom" height={36}/>
+                <Tooltip 
+                  contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', borderRadius: '12px', border: 'none'}}
+                  itemStyle={{ color: isDarkMode ? '#fff' : '#000' }}
+                />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: isDarkMode ? '#94a3b8' : '#64748b' }}/>
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -732,23 +740,26 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
       </div>
 
       <div className="mb-12">
-        <h2 className="text-2xl font-serif mb-8">Análise Detalhada</h2>
+        <h2 className="text-2xl font-serif mb-8 dark:text-white">Análise Detalhada</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {additionalFields.map((field) => {
             const data = getChartDataForField(field.key);
             return (
               <div key={field.key} className="glass-card p-6 rounded-[24px] shadow-lg border border-white/10">
-                <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700">
+                <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-slate-300">
                   {field.icon} {field.label}
                 </h4>
                 <div className="h-[200px] relative">
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                     {field.type === 'bar' ? (
                       <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} />
-                        <YAxis axisLine={false} tickLine={false} fontSize={10} />
-                        <Tooltip contentStyle={{borderRadius: '8px', border: 'none', fontSize: '12px'}} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "#334155" : "#f1f5f9"} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} stroke={isDarkMode ? "#94a3b8" : "#64748b"} />
+                        <YAxis axisLine={false} tickLine={false} fontSize={10} stroke={isDarkMode ? "#94a3b8" : "#64748b"} />
+                        <Tooltip 
+                          contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', borderRadius: '8px', border: 'none', fontSize: '12px'}}
+                          itemStyle={{ color: isDarkMode ? '#fff' : '#000' }}
+                        />
                         <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     ) : (
@@ -766,8 +777,11 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={{borderRadius: '8px', border: 'none', fontSize: '12px'}} />
-                        <Legend iconSize={8} wrapperStyle={{fontSize: '10px'}} />
+                        <Tooltip 
+                          contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', borderRadius: '8px', border: 'none', fontSize: '12px'}}
+                          itemStyle={{ color: isDarkMode ? '#fff' : '#000' }}
+                        />
+                        <Legend iconSize={8} wrapperStyle={{fontSize: '10px', color: isDarkMode ? '#94a3b8' : '#64748b'}} />
                       </PieChart>
                     )}
                   </ResponsiveContainer>
@@ -778,14 +792,14 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           
           {/* Top Reasons / Opinions */}
           <div className="glass-card p-6 rounded-[24px] shadow-lg border border-white/10">
-            <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700">
+            <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-300">
               <BookOpen className="w-5 h-5 text-orange-500" /> Motivos de Recusa (Top 5)
             </h4>
             <div className="space-y-3">
               {getTopValues('skipped_reason').map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-xs">
-                  <span className="text-slate-600 truncate mr-2" title={item.name}>{item.name}</span>
-                  <span className="font-bold bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full">{item.value}</span>
+                  <span className="text-slate-700 dark:text-slate-400 truncate mr-2" title={item.name}>{item.name}</span>
+                  <span className="font-bold bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full">{item.value}</span>
                 </div>
               ))}
               {getTopValues('skipped_reason').length === 0 && (
@@ -795,14 +809,14 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
           </div>
 
           <div className="glass-card p-6 rounded-[24px] shadow-lg border border-white/10">
-            <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700">
+            <h4 className="text-sm font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-300">
               <Info className="w-5 h-5 text-blue-500" /> Por que não vacinar? (Top 5)
             </h4>
             <div className="space-y-3">
               {getTopValues('why_not_vax').map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-xs">
-                  <span className="text-slate-600 truncate mr-2" title={item.name}>{item.name}</span>
-                  <span className="font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{item.value}</span>
+                  <span className="text-slate-700 dark:text-slate-400 truncate mr-2" title={item.name}>{item.name}</span>
+                  <span className="font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full">{item.value}</span>
                 </div>
               ))}
               {getTopValues('why_not_vax').length === 0 && (
@@ -821,13 +835,13 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white p-8 rounded-[32px] shadow-2xl max-w-md w-full"
+              className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-2xl max-w-md w-full border border-slate-100 dark:border-white/10"
             >
-              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl flex items-center justify-center mb-6">
                 <ShieldAlert className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-serif mb-2">Resetar Banco de Dados</h3>
-              <p className="text-slate-500 text-sm mb-6">Esta ação apagará permanentemente todas as respostas da pesquisa. Digite a senha de administrador para confirmar.</p>
+              <h3 className="text-2xl font-serif mb-2 dark:text-white">Resetar Banco de Dados</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Esta ação apagará permanentemente todas as respostas da pesquisa. Digite a senha de administrador para confirmar.</p>
               
               <div className="space-y-4">
                 <input 
@@ -835,7 +849,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                   placeholder="Senha de Administrador"
                   value={resetPassword}
                   onChange={(e) => setResetPassword(e.target.value)}
-                  className="w-full px-6 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                  className="w-full px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all dark:text-white"
                 />
                 
                 {resetError && (
@@ -845,7 +859,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                 <div className="flex gap-3 pt-2">
                   <button 
                     onClick={() => setShowResetModal(false)}
-                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                    className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                   >
                     Cancelar
                   </button>
@@ -864,8 +878,8 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
       </AnimatePresence>
 
       <div className="glass-card rounded-[32px] shadow-xl overflow-hidden">
-        <div className="p-8 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-xl font-bold">Respostas Recentes</h3>
+        <div className="p-8 border-b border-slate-100 dark:border-white/10 flex justify-between items-center">
+          <h3 className="text-xl font-bold dark:text-white">Respostas Recentes</h3>
           <span className="px-3 py-1 bg-vax-blue/10 text-vax-blue text-xs font-bold rounded-full">
             {surveys.length} Respostas
           </span>
@@ -873,7 +887,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+              <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                 <th className="px-8 py-4 font-bold">ID</th>
                 <th className="px-8 py-4 font-bold">Idade</th>
                 <th className="px-8 py-4 font-bold">A Favor?</th>
@@ -882,22 +896,22 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
                 <th className="px-8 py-4 font-bold">Confiança</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {surveys.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                   <td className="px-8 py-4 text-sm font-mono text-slate-400">#{row.id}</td>
-                  <td className="px-8 py-4 text-sm font-medium">{row.age || '-'}</td>
+                  <td className="px-8 py-4 text-sm font-medium dark:text-slate-300">{row.age || '-'}</td>
                   <td className="px-8 py-4 text-sm">
                     <span className={`px-2 py-1 rounded-md text-xs font-bold ${
-                      row.vaccineOpinion === 'Sim' ? 'bg-green-100 text-green-700' : 
-                      row.vaccineOpinion === 'Não' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                      row.vaccineOpinion === 'Sim' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 
+                      row.vaccineOpinion === 'Não' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
                     }`}>
                       {row.vaccineOpinion || 'N/A'}
                     </span>
                   </td>
-                  <td className="px-8 py-4 text-sm">{row.covid || '-'}</td>
-                  <td className="px-8 py-4 text-sm text-slate-500">{row.doses || '-'}</td>
-                  <td className="px-8 py-4 text-sm font-medium">{row.trust || '-'}</td>
+                  <td className="px-8 py-4 text-sm dark:text-slate-300">{row.covid || '-'}</td>
+                  <td className="px-8 py-4 text-sm text-slate-500 dark:text-slate-400">{row.doses || '-'}</td>
+                  <td className="px-8 py-4 text-sm font-medium dark:text-slate-300">{row.trust || '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -908,7 +922,7 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
   );
 };
 
-const CalendarsPage = ({ onBack }: { onBack: () => void, key?: string }) => {
+const CalendarsPage = ({ onBack, isDarkMode }: { onBack: () => void, isDarkMode: boolean, key?: string }) => {
   const handleDownload = (title: string, url: string) => {
     const link = document.createElement('a');
     link.href = url;
@@ -945,15 +959,15 @@ const CalendarsPage = ({ onBack }: { onBack: () => void, key?: string }) => {
               <item.icon className="w-7 h-7" />
             </div>
             <div className="mb-4">
-              <span className="text-xs font-mono font-bold text-vax-blue uppercase tracking-wider">{item.age}</span>
-              <h3 className="text-2xl font-serif mt-1">{item.title}</h3>
+              <span className="text-xs font-mono font-bold text-vax-blue dark:text-vax-blue/80 uppercase tracking-wider">{item.age}</span>
+              <h3 className="text-2xl font-serif mt-1 dark:text-white">{item.title}</h3>
             </div>
-            <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-grow">
+            <p className="text-slate-700 dark:text-slate-400 text-sm leading-relaxed mb-8 flex-grow">
               {item.description}
             </p>
             <button 
               onClick={() => handleDownload(item.title, item.pdfUrl)}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-medium hover:bg-vax-blue transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 bg-slate-900 dark:bg-vax-blue text-white rounded-2xl font-medium hover:bg-vax-blue dark:hover:bg-vax-blue/90 transition-all flex items-center justify-center gap-2"
             >
               <Database className="w-4 h-4" /> Baixar PDF Oficial
             </button>
@@ -961,21 +975,21 @@ const CalendarsPage = ({ onBack }: { onBack: () => void, key?: string }) => {
         ))}
       </div>
 
-      <div className="mt-24 p-8 md:p-12 rounded-[40px] bg-vax-blue/5 border border-vax-blue/10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+      <div className="mt-24 p-8 md:p-12 rounded-[40px] bg-vax-blue/5 dark:bg-vax-blue/10 border border-vax-blue/10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
         <div className="flex-1">
-          <h3 className="text-3xl font-serif mb-4">Compromisso com a Vida</h3>
-          <p className="text-slate-600 leading-relaxed">
+          <h3 className="text-3xl font-serif mb-4 dark:text-white">Compromisso com a Vida</h3>
+          <p className="text-slate-700 dark:text-slate-400 leading-relaxed">
             Os calendários são atualizados anualmente pelo Ministério da Saúde para garantir que a população brasileira tenha acesso às tecnologias mais recentes em imunização. Manter sua caderneta em dia é um ato de respeito por si mesmo e por toda a comunidade.
           </p>
         </div>
         <div className="w-full md:w-auto">
-          <div className="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-white/10 flex items-center gap-4">
             <div className="w-12 h-12 bg-vax-green/10 rounded-full flex items-center justify-center text-vax-green">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-bold">Dados Atualizados</p>
-              <p className="text-xs text-slate-500">Ciclo de Vida 2026</p>
+              <p className="text-sm font-bold dark:text-white">Dados Atualizados</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Ciclo de Vida 2026</p>
             </div>
           </div>
         </div>
@@ -986,7 +1000,7 @@ const CalendarsPage = ({ onBack }: { onBack: () => void, key?: string }) => {
 
 // --- SUB-PAGES ---
 
-const InvestigationPage = ({ onBack }: { onBack: () => void, key?: string }) => (
+const InvestigationPage = ({ onBack, isDarkMode }: { onBack: () => void, isDarkMode: boolean, key?: string }) => (
   <motion.div 
     initial={{ opacity: 0, x: 100 }}
     animate={{ opacity: 1, x: 0 }}
@@ -1001,8 +1015,8 @@ const InvestigationPage = ({ onBack }: { onBack: () => void, key?: string }) => 
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
       <div className="space-y-8">
-        <h3 className="text-3xl font-serif">O Ciclo de Desenvolvimento</h3>
-        <p className="text-slate-600 leading-relaxed">
+        <h3 className="text-3xl font-serif dark:text-white">O Ciclo de Desenvolvimento</h3>
+        <p className="text-slate-700 dark:text-slate-400 leading-relaxed">
           Diferente do que a desinformação prega, nenhuma vacina é aprovada sem testes exaustivos. O processo biomédico é um dos mais rigorosos da ciência moderna.
         </p>
         
@@ -1019,14 +1033,14 @@ const InvestigationPage = ({ onBack }: { onBack: () => void, key?: string }) => 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="flex gap-6 p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+              className="flex gap-6 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="w-12 h-12 rounded-xl bg-vax-blue/10 flex items-center justify-center text-vax-blue shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-vax-blue/10 dark:bg-vax-blue/20 flex items-center justify-center text-vax-blue shrink-0">
                 <step.icon className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-slate-900">{step.phase}</h4>
-                <p className="text-sm text-slate-500">{step.desc}</p>
+                <h4 className="font-bold text-slate-900 dark:text-white">{step.phase}</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{step.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -1037,20 +1051,20 @@ const InvestigationPage = ({ onBack }: { onBack: () => void, key?: string }) => 
         <div className="sticky top-32 glass-card p-6 md:p-8 rounded-[40px] border-vax-blue/20">
           <div className="flex items-center gap-3 mb-6">
             <Dna className="w-8 h-8 text-vax-blue" />
-            <h3 className="text-2xl font-serif">Tecnologia de Ponta</h3>
+            <h3 className="text-2xl font-serif dark:text-white">Tecnologia de Ponta</h3>
           </div>
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-vax-blue/5 border border-vax-blue/10">
-              <h4 className="font-bold mb-2">Vacinas de RNA Mensageiro (mRNA)</h4>
-              <p className="text-sm text-slate-600">Não alteram seu DNA. Elas fornecem apenas a "receita" para que suas células produzam uma proteína do vírus, ensinando o corpo a se defender.</p>
+            <div className="p-6 rounded-2xl bg-vax-blue/5 dark:bg-vax-blue/10 border border-vax-blue/10">
+              <h4 className="font-bold mb-2 dark:text-white">Vacinas de RNA Mensageiro (mRNA)</h4>
+              <p className="text-sm text-slate-700 dark:text-slate-400">Não alteram seu DNA. Elas fornecem apenas a "receita" para que suas células produzam uma proteína do vírus, ensinando o corpo a se defender.</p>
             </div>
-            <div className="p-6 rounded-2xl bg-vax-green/5 border border-vax-green/10">
-              <h4 className="font-bold mb-2">Vetor Viral</h4>
-              <p className="text-sm text-slate-600">Utiliza um vírus inofensivo (como um adenovírus) para levar a informação genética do patógeno alvo ao sistema imune.</p>
+            <div className="p-6 rounded-2xl bg-vax-green/5 dark:bg-vax-green/10 border border-vax-green/10">
+              <h4 className="font-bold mb-2 dark:text-white">Vetor Viral</h4>
+              <p className="text-sm text-slate-700 dark:text-slate-400">Utiliza um vírus inofensivo (como um adenovírus) para levar a informação genética do patógeno alvo ao sistema imune.</p>
             </div>
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200">
-              <h4 className="font-bold mb-2">Vírus Inativado</h4>
-              <p className="text-sm text-slate-600">Tecnologia clássica que utiliza o vírus "morto" por meios químicos ou físicos, incapaz de causar doença.</p>
+            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10">
+              <h4 className="font-bold mb-2 dark:text-white">Vírus Inativado</h4>
+              <p className="text-sm text-slate-700 dark:text-slate-400">Tecnologia clássica que utiliza o vírus "morto" por meios químicos ou físicos, incapaz de causar doença.</p>
             </div>
           </div>
           <div className="mt-8 p-4 bg-vax-red/5 border border-vax-red/10 rounded-xl flex gap-3">
@@ -1065,7 +1079,7 @@ const InvestigationPage = ({ onBack }: { onBack: () => void, key?: string }) => 
   </motion.div>
 );
 
-const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
+const HistoryPage = ({ onBack, isDarkMode }: { onBack: () => void, isDarkMode: boolean, key?: string }) => (
   <motion.div 
     initial={{ opacity: 0, x: 100 }}
     animate={{ opacity: 1, x: 0 }}
@@ -1080,17 +1094,18 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
       <div className="h-[400px] md:h-[500px] glass-card p-6 md:p-8 rounded-[40px] relative">
-        <h3 className="text-2xl font-serif mb-8 flex items-center gap-3">
+        <h3 className="text-2xl font-serif mb-8 flex items-center gap-3 dark:text-white">
           <Database className="w-6 h-6 text-vax-blue" /> Redução de Doenças (%)
         </h3>
         <ResponsiveContainer width="100%" height="80%" minWidth={0} debounce={100}>
           <BarChart data={diseaseEradicationData} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDarkMode ? "#334155" : "#e2e8f0"} />
             <XAxis type="number" domain={[0, 100]} stroke="#94a3b8" />
             <YAxis dataKey="name" type="category" stroke="#94a3b8" width={80} />
             <Tooltip 
-              cursor={{ fill: 'rgba(14, 165, 233, 0.05)' }}
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+              cursor={{ fill: isDarkMode ? 'rgba(14, 165, 233, 0.1)' : 'rgba(14, 165, 233, 0.05)' }}
+              contentStyle={{ backgroundColor: isDarkMode ? '#1e293b' : '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+              itemStyle={{ color: isDarkMode ? '#fff' : '#000' }}
             />
             <Bar dataKey="reduction" radius={[0, 4, 4, 0]}>
               {diseaseEradicationData.map((entry, index) => (
@@ -1105,7 +1120,7 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
       </div>
 
       <div className="space-y-12">
-        <div className="relative pl-8 border-l-2 border-slate-200 space-y-12">
+        <div className="relative pl-8 border-l-2 border-slate-200 dark:border-slate-800 space-y-12">
           {[
             { year: "1796", event: "Edward Jenner", desc: "Criação da primeira vacina (Varíola) usando o vírus da varíola bovina." },
             { year: "1885", event: "Louis Pasteur", desc: "Desenvolvimento da vacina contra a Raiva, marcando o início da vacinologia moderna." },
@@ -1114,17 +1129,17 @@ const HistoryPage = ({ onBack }: { onBack: () => void, key?: string }) => (
             { year: "2020", event: "Aceleração Genômica", desc: "Desenvolvimento recorde de vacinas de mRNA contra a COVID-19." }
           ].map((milestone, i) => (
             <div key={i} className="relative">
-              <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-vax-blue border-4 border-vax-paper" />
+              <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-vax-blue border-4 border-vax-paper dark:border-slate-950" />
               <span className="text-vax-blue font-mono font-bold">{milestone.year}</span>
-              <h4 className="text-xl font-serif mt-1">{milestone.event}</h4>
-              <p className="text-slate-500 text-sm mt-2">{milestone.desc}</p>
+              <h4 className="text-xl font-serif mt-1 dark:text-white">{milestone.event}</h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mt-2">{milestone.desc}</p>
             </div>
           ))}
         </div>
       </div>
     </div>
 
-    <div className="bg-slate-900 text-white p-8 md:p-12 rounded-[40px] text-center">
+    <div className="bg-slate-900 dark:bg-slate-900/50 text-white p-8 md:p-12 rounded-[40px] text-center border border-white/5">
       <h3 className="text-3xl font-serif mb-6">A Ciência não para</h3>
       <p className="text-slate-400 max-w-2xl mx-auto mb-8">
         Hoje, a biomedicina trabalha em vacinas contra o Câncer, HIV e Malária, utilizando o conhecimento acumulado por séculos de pesquisa e dedicação.
@@ -1152,8 +1167,23 @@ function AppContent() {
   const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -1183,7 +1213,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen academic-grid overflow-x-hidden">
+      <div className="min-h-screen academic-grid overflow-x-hidden bg-vax-paper dark:bg-slate-950 transition-colors duration-300">
         {/* Progress Bar */}
         <motion.div 
           className="fixed top-0 left-0 right-0 h-1 bg-vax-blue z-50 origin-left"
@@ -1191,7 +1221,7 @@ function AppContent() {
         />
 
         <InstagramQRCode />
-        <Navbar user={user} onLogout={handleLogout} />
+        <Navbar user={user} onLogout={handleLogout} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
         <AnimatePresence mode="wait">
           <motion.div 
@@ -1231,26 +1261,26 @@ function AppContent() {
                       transition={{ duration: 0.8 }}
                       className="z-10 max-w-4xl flex flex-col items-center"
                     >
-                      <Logo size={48} className="mb-8 drop-shadow-xl" />
-                      <span className="inline-block px-4 py-1 mb-6 text-xs font-mono font-bold tracking-widest uppercase bg-vax-blue/10 text-vax-blue border border-vax-blue/20 rounded-full">
+                      <Logo size={48} className="mb-8 drop-shadow-xl text-slate-900 dark:text-white" />
+                      <span className="inline-block px-4 py-1 mb-6 text-xs font-mono font-bold tracking-widest uppercase bg-vax-blue/10 dark:bg-vax-blue/20 text-vax-blue border border-vax-blue/20 rounded-full">
                         No combate a desinformação
                       </span>
-                      <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-tight text-balance">
+                      <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-tight text-balance text-slate-900 dark:text-white">
                         O Escudo da <span className="italic text-vax-blue">Humanidade</span>
                       </h1>
-                      <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+                      <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
                         Explorando a ciência por trás da imunização e o perigo iminente do retrocesso informacional.
                       </p>
                       <div className="flex flex-wrap justify-center gap-6">
                         <button 
                           onClick={() => navigate('/investigation')}
-                          className="px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all flex items-center gap-2 group"
+                          className="px-8 py-4 bg-slate-900 dark:bg-vax-blue text-white rounded-full font-medium hover:bg-slate-800 dark:hover:bg-vax-blue/90 transition-all flex items-center gap-2 group"
                         >
                           Começar Investigação <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                         <button 
                           onClick={() => navigate('/history')}
-                          className="px-8 py-4 border border-slate-200 rounded-full font-medium hover:bg-white transition-all"
+                          className="px-8 py-4 border border-slate-200 dark:border-white/10 rounded-full font-medium hover:bg-white dark:hover:bg-slate-800 transition-all text-slate-900 dark:text-white"
                         >
                           Ver Dados Históricos
                         </button>
@@ -1299,11 +1329,11 @@ function AppContent() {
                           transition={{ delay: i * 0.2 }}
                           className="glass-card p-6 md:p-8 rounded-3xl hover:shadow-2xl transition-all group"
                         >
-                          <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                          <div className={`w-16 h-16 ${item.color} dark:bg-vax-blue/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                             <item.icon className="w-8 h-8" />
                           </div>
-                          <h3 className="text-2xl font-serif mb-4">{item.title}</h3>
-                          <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                          <h3 className="text-2xl font-serif mb-4 dark:text-white">{item.title}</h3>
+                          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
                         </motion.div>
                       ))}
                     </div>
@@ -1354,7 +1384,7 @@ function AppContent() {
                                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                                 </linearGradient>
                               </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#334155" : "#334155"} />
                               <XAxis dataKey="year" stroke="#94a3b8" />
                               <YAxis stroke="#94a3b8" />
                               <Tooltip 
@@ -1377,15 +1407,15 @@ function AppContent() {
                   <section className="py-24 px-6 max-w-7xl mx-auto">
                     <SectionTitle subtitle="Módulo 03: Sociologia da Saúde">O Perigo do Retrocesso</SectionTitle>
                     
-                    <div className="bg-vax-red/5 border border-vax-red/20 rounded-[40px] p-8 md:p-16 relative overflow-hidden">
+                    <div className="bg-vax-red/5 dark:bg-vax-red/10 border border-vax-red/20 rounded-[40px] p-8 md:p-16 relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-8 opacity-10">
                         <ShieldAlert className="w-64 h-64 text-vax-red" />
                       </div>
                       
                       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
-                          <h3 className="text-4xl font-serif mb-6 text-slate-900">A Desinformação como Patógeno</h3>
-                          <p className="text-lg text-slate-700 mb-8 leading-relaxed">
+                          <h3 className="text-4xl font-serif mb-6 text-slate-900 dark:text-white">A Desinformação como Patógeno</h3>
+                          <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 leading-relaxed">
                             O movimento anti-vacina não é apenas uma escolha pessoal; é um ataque à <span className="font-bold">Imunidade de Rebanho</span>. Quando a cobertura vacinal cai abaixo de certos níveis (geralmente 95%), doenças que estavam controladas voltam a surgir.
                           </p>
                           
@@ -1402,7 +1432,7 @@ function AppContent() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="flex items-center gap-3 text-slate-800"
+                                className="flex items-center gap-3 text-slate-800 dark:text-slate-200"
                               >
                                 <div className="w-2 h-2 rounded-full bg-vax-red" />
                                 <span>{text}</span>
@@ -1412,16 +1442,16 @@ function AppContent() {
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-white/10">
                             <span className="text-4xl font-serif text-vax-red block mb-2">95%</span>
-                            <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">Mínimo para Imunidade de Rebanho</span>
+                            <span className="text-xs font-mono uppercase tracking-tighter text-slate-500 dark:text-slate-400">Mínimo para Imunidade de Rebanho</span>
                           </div>
-                          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-white/10">
                             <span className="text-4xl font-serif text-vax-red block mb-2">2019</span>
-                            <span className="text-xs font-mono uppercase tracking-tighter text-slate-500">OMS declara anti-vax como ameaça global</span>
+                            <span className="text-xs font-mono uppercase tracking-tighter text-slate-500 dark:text-slate-400">OMS declara anti-vax como ameaça global</span>
                           </div>
-                          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 sm:col-span-2">
-                            <p className="text-sm italic text-slate-600">
+                          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-white/10 sm:col-span-2">
+                            <p className="text-sm italic text-slate-600 dark:text-slate-400">
                               "A hesitação vacinal ameaça reverter o progresso feito no combate a doenças evitáveis por vacinação."
                             </p>
                           </div>
@@ -1431,7 +1461,7 @@ function AppContent() {
                   </section>
 
                   {/* Call to Action */}
-                  <section className="py-24 px-6 text-center bg-vax-blue/5">
+                  <section className="py-24 px-6 text-center bg-vax-blue/5 dark:bg-vax-blue/10">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       whileInView={{ opacity: 1, scale: 1 }}
@@ -1439,8 +1469,8 @@ function AppContent() {
                       className="max-w-3xl mx-auto"
                     >
                       <Users className="w-16 h-16 text-vax-blue mx-auto mb-8" />
-                      <h2 className="font-serif text-5xl mb-6">Proteja o Futuro</h2>
-                      <p className="text-xl text-slate-600 mb-12">
+                      <h2 className="font-serif text-5xl mb-6 dark:text-white">Proteja o Futuro</h2>
+                      <p className="text-xl text-slate-600 dark:text-slate-300 mb-12">
                         A vacinação é um pacto social. Ao se vacinar, você protege não apenas a si mesmo, mas também aqueles que não podem ser vacinados por motivos médicos.
                       </p>
                       <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -1452,7 +1482,7 @@ function AppContent() {
                         </button>
                         <button 
                           onClick={() => navigate('/formulario')}
-                          className="px-10 py-4 bg-white border border-vax-blue text-vax-blue rounded-full font-bold hover:bg-vax-blue/5 transition-all shadow-lg shadow-vax-blue/5"
+                          className="px-10 py-4 bg-white dark:bg-slate-900 border border-vax-blue text-vax-blue rounded-full font-bold hover:bg-vax-blue/5 dark:hover:bg-vax-blue/20 transition-all shadow-lg shadow-vax-blue/5"
                         >
                           Responder Formulário
                         </button>
@@ -1469,7 +1499,7 @@ function AppContent() {
                               navigator.clipboard.writeText(window.location.href);
                             }
                           }}
-                          className="px-10 py-4 bg-white border border-slate-200 rounded-full font-bold hover:bg-slate-50 transition-all"
+                          className="px-10 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-full font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all dark:text-white"
                         >
                           Compartilhar Ciência
                         </button>
@@ -1479,30 +1509,30 @@ function AppContent() {
                 </div>
               } />
               <Route path="/formulario" element={<Formulario />} />
-              <Route path="/investigation" element={<InvestigationPage onBack={() => navigate('/')} />} />
-              <Route path="/history" element={<HistoryPage onBack={() => navigate('/')} />} />
-              <Route path="/calendars" element={<CalendarsPage onBack={() => navigate('/')} />} />
+              <Route path="/investigation" element={<InvestigationPage onBack={() => navigate('/')} isDarkMode={isDarkMode} />} />
+              <Route path="/history" element={<HistoryPage onBack={() => navigate('/')} isDarkMode={isDarkMode} />} />
+              <Route path="/calendars" element={<CalendarsPage onBack={() => navigate('/')} isDarkMode={isDarkMode} />} />
               <Route path="/login" element={<LoginPage onLogin={() => navigate('/dashboard')} onBack={() => navigate('/')} />} />
-              <Route path="/dashboard" element={<DashboardPage onLogout={handleLogout} user={user} />} />
+              <Route path="/dashboard" element={<DashboardPage onLogout={handleLogout} user={user} isDarkMode={isDarkMode} />} />
             </Routes>
           </motion.div>
         </AnimatePresence>
 
         {/* Footer */}
-        <footer className="pt-20 pb-10 px-6 border-t border-slate-100 bg-white">
+        <footer className="pt-20 pb-10 px-6 border-t border-slate-100 dark:border-white/5 bg-white dark:bg-slate-950">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
               <div className="col-span-1 md:col-span-2">
-                <Logo size={32} className="mb-6" />
-                <p className="text-slate-500 max-w-sm leading-relaxed">
+                <Logo size={32} className="mb-6 text-slate-900 dark:text-white" />
+                <p className="text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
                   Uma iniciativa dedicada a combater a desinformação através da ciência, 
                   promovendo a saúde pública e a conscientização sobre a importância vital da vacinação.
                 </p>
               </div>
               
               <div>
-                <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Navegação</h4>
-                <ul className="space-y-4 text-sm text-slate-500">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-6 font-mono text-xs uppercase tracking-widest">Navegação</h4>
+                <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
                   <li><button onClick={() => navigate('/')} className="hover:text-vax-blue transition-colors">Início</button></li>
                   <li><button onClick={() => navigate('/investigation')} className="hover:text-vax-blue transition-colors">Investigação Científica</button></li>
                   <li><button onClick={() => navigate('/history')} className="hover:text-vax-blue transition-colors">Dados Históricos</button></li>
@@ -1512,8 +1542,8 @@ function AppContent() {
               </div>
 
               <div>
-                <h4 className="font-bold text-slate-900 mb-6 font-mono text-xs uppercase tracking-widest">Recursos</h4>
-                <ul className="space-y-4 text-sm text-slate-500">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-6 font-mono text-xs uppercase tracking-widest">Recursos</h4>
+                <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
                   <li><a href="https://www.gov.br/saude/pt-br" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">Ministério da Saúde</a></li>
                   <li><a href="https://www.who.int" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OMS</a></li>
                   <li><a href="https://www.paho.org/pt/brasil" target="_blank" rel="noopener noreferrer" className="hover:text-vax-blue transition-colors">OPAS</a></li>
@@ -1521,7 +1551,7 @@ function AppContent() {
               </div>
             </div>
             
-            <div className="pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="pt-8 border-t border-slate-50 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-vax-green animate-pulse" />
                 @2026 Feito por pessoas que amam a ciência

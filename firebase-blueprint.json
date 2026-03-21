@@ -1,32 +1,35 @@
 {
   "entities": {
-    "Survey": {
-      "title": "Survey Response",
-      "description": "A response to the vaccination survey",
+    "Response": {
+      "title": "Response",
+      "description": "A survey response from a user.",
       "type": "object",
       "properties": {
-        "age": { "type": "string", "description": "Age group of the respondent" },
-        "vaccineOpinion": { "type": "string", "description": "Whether the respondent is in favor of vaccines" },
-        "importance": { "type": "string", "description": "Opinion on vaccine importance" },
-        "updated": { "type": "string", "description": "Whether vaccination status is updated" },
-        "covid": { "type": "string", "description": "COVID-19 vaccination status" },
-        "doses": { "type": "string", "description": "Number of COVID-19 doses" },
-        "last_5_years": { "type": "string", "description": "Number of vaccines in last 5 years" },
-        "trust": { "type": "string", "description": "Trust in vaccines" },
-        "influence": { "type": "string", "description": "Main influence for vaccination" },
-        "skipped": { "type": "string", "description": "Whether any vaccine was skipped" },
-        "skipped_reason": { "type": "string", "description": "Reason for skipping" },
-        "why_not_vax": { "type": "string", "description": "Reason for not vaccinating" },
-        "campaigns": { "type": "string", "description": "Opinion on health campaigns" },
-        "interest_campaign_2026": { "type": "string", "description": "Interest in 2026 vaccination campaign" },
-        "created_at": { "type": "string", "format": "date-time", "description": "Timestamp of submission" }
-      }
+        "name": {
+          "type": "string",
+          "description": "The name of the respondent."
+        },
+        "age": {
+          "type": "integer",
+          "description": "The age of the respondent."
+        },
+        "interest_campaign_2026": {
+          "type": "boolean",
+          "description": "Whether the respondent is interested in the 2026 vaccination campaign."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the response was submitted."
+        }
+      },
+      "required": ["name", "age", "interest_campaign_2026", "createdAt"]
     }
   },
   "firestore": {
-    "surveys": {
-      "schema": "Survey",
-      "description": "Collection of survey responses"
+    "responses": {
+      "schema": "Response",
+      "description": "A collection of survey responses."
     }
   }
 }

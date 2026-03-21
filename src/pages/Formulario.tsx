@@ -23,7 +23,7 @@ const SectionTitle = ({ children, subtitle, dark = false }: { children: React.Re
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className={`font-mono text-xs uppercase tracking-[0.3em] mb-4 ${dark ? 'text-vax-blue/60' : 'text-vax-blue'}`}
+        className={`font-mono text-xs uppercase tracking-[0.3em] mb-4 ${dark ? 'text-vax-blue/60' : 'text-vax-blue dark:text-vax-blue/80'}`}
       >
         {subtitle}
       </motion.p>
@@ -32,7 +32,7 @@ const SectionTitle = ({ children, subtitle, dark = false }: { children: React.Re
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className={`font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}
+      className={`font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight ${dark ? 'text-white' : 'text-slate-900 dark:text-white'}`}
     >
       {children}
     </motion.h2>
@@ -130,16 +130,16 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
         <div className="w-20 h-20 bg-vax-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 className="w-10 h-10 text-vax-green" />
         </div>
-        <h3 className="text-3xl font-serif mb-4">Obrigado!</h3>
-        <p className="text-slate-600">Suas respostas anônimas foram enviadas com sucesso e ajudarão em nossa pesquisa científica.</p>
-        <p className="text-slate-400 text-sm mt-8 italic">Redirecionando para o início...</p>
+        <h3 className="text-3xl font-serif mb-4 dark:text-white">Obrigado!</h3>
+        <p className="text-slate-700 dark:text-slate-400">Suas respostas anônimas foram enviadas com sucesso e ajudarão em nossa pesquisa científica.</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-8 italic">Redirecionando para o início...</p>
       </motion.div>
     );
   }
 
   const RadioGroup = ({ name, options, label, onChange }: { name: string, options: string[], label: string, onChange?: (val: string) => void }) => (
     <div className="space-y-3">
-      <label className="text-base font-bold text-slate-800 block">{label}</label>
+      <label className="text-base font-bold text-slate-900 dark:text-slate-200 block">{label}</label>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {options.map((option) => (
           <label key={option} className="cursor-pointer group block">
@@ -155,7 +155,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
               }}
               className="sr-only peer" 
             />
-            <div className="px-4 py-3 rounded-xl border border-slate-200 text-center peer-checked:bg-vax-blue peer-checked:text-white peer-checked:border-vax-blue peer-checked:shadow-lg peer-checked:scale-[1.02] group-hover:bg-slate-50 group-hover:border-vax-blue/30 active:scale-[0.95] transition-all text-sm font-bold select-none shadow-sm">
+            <div className="px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-center peer-checked:bg-vax-blue peer-checked:text-white peer-checked:border-vax-blue peer-checked:shadow-lg peer-checked:scale-[1.02] group-hover:bg-slate-50 dark:group-hover:bg-slate-800 group-hover:border-vax-blue/30 active:scale-[0.95] transition-all text-sm font-bold select-none shadow-sm dark:text-slate-300">
               {option}
             </div>
           </label>
@@ -249,7 +249,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
               type="text" 
               placeholder="Especifique o que influencia sua decisão"
               onChange={(e) => setFormData((prev: any) => ({ ...prev, influence_other: e.target.value }))}
-              className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all"
+              className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all dark:text-white"
             />
           </motion.div>
         )}
@@ -269,11 +269,11 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
             animate={{ opacity: 1, height: 'auto' }}
             className="pl-6 border-l-4 border-vax-blue/20 space-y-2"
           >
-            <label className="text-sm font-bold text-slate-700 block">Se sim, por qual motivo?</label>
+            <label className="text-sm font-bold text-slate-800 dark:text-slate-300 block">Se sim, por qual motivo?</label>
             <textarea 
               rows={3}
               onChange={(e) => setFormData((prev: any) => ({ ...prev, skipped_reason: e.target.value }))}
-              className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all resize-none"
+              className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all resize-none dark:text-white"
             ></textarea>
           </motion.div>
         )}
@@ -281,11 +281,11 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
 
       {/* 10. Opinião sobre outros */}
       <div className="space-y-2">
-        <label className="text-base font-bold text-slate-800 block">10. Na sua opinião, por que algumas pessoas não querem se vacinar?</label>
+        <label className="text-base font-bold text-slate-900 dark:text-slate-200 block">10. Na sua opinião, por que algumas pessoas não querem se vacinar?</label>
         <textarea 
           rows={4}
           onChange={(e) => setFormData((prev: any) => ({ ...prev, why_not_vax: e.target.value }))}
-          className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all resize-none"
+          className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 focus:border-vax-blue focus:ring-2 focus:ring-vax-blue/20 outline-none transition-all resize-none dark:text-white"
         ></textarea>
       </div>
 
@@ -328,7 +328,7 @@ const Formulario = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -342,9 +342,9 @@ const Formulario = () => {
           <ArrowLeft className="w-5 h-5" /> Voltar para o Início
         </button>
 
-        <div className="bg-white p-8 md:p-12 rounded-[40px] shadow-2xl border border-slate-100">
+        <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[40px] shadow-2xl border border-slate-100 dark:border-white/10">
           <SectionTitle subtitle="Pesquisa de Opinião Anônima">Formulário de Conscientização</SectionTitle>
-          <p className="text-slate-600 mb-12">
+          <p className="text-slate-700 dark:text-slate-400 mb-12">
             Sua participação é anônima e fundamental para entendermos a percepção pública sobre a vacinação.
           </p>
 

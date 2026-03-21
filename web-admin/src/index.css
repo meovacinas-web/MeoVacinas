@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6;
+}
+
+.btn-outline {
+  @apply border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}

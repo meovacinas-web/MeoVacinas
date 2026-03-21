@@ -18,15 +18,15 @@ export const Logo: React.FC<LogoProps> = ({ className = "", size = 40 }) => {
       {/* Syringe Outline */}
       <path 
         d="M20 30V75C20 80 25 85 35 85C45 85 50 80 50 75V30" 
-        stroke="black" 
+        stroke="currentColor" 
         strokeWidth="3.5" 
         strokeLinecap="round"
       />
-      <rect x="12" y="25" width="46" height="6" rx="1" fill="black" />
+      <rect x="12" y="25" width="46" height="6" rx="1" fill="currentColor" />
       
       {/* Plunger */}
-      <rect x="32" y="12" width="6" height="13" fill="black" />
-      <rect x="22" y="6" width="26" height="6" rx="1.5" stroke="black" strokeWidth="3" fill="none" />
+      <rect x="32" y="12" width="6" height="13" fill="currentColor" />
+      <rect x="22" y="6" width="26" height="6" rx="1.5" stroke="currentColor" strokeWidth="3" fill="none" />
       
       {/* Liquid inside (partially filled) */}
       <path 
@@ -35,19 +35,19 @@ export const Logo: React.FC<LogoProps> = ({ className = "", size = 40 }) => {
       />
       
       {/* Markings */}
-      <rect x="32" y="40" width="10" height="2.5" fill="black" />
-      <rect x="32" y="52" width="10" height="2.5" fill="black" />
-      <rect x="32" y="64" width="10" height="2.5" fill="black" />
+      <rect x="32" y="40" width="10" height="2.5" fill="currentColor" />
+      <rect x="32" y="52" width="10" height="2.5" fill="currentColor" />
+      <rect x="32" y="64" width="10" height="2.5" fill="currentColor" />
       
       {/* Bottom detail and Needle */}
-      <path d="M28 85H42L38 90H32L28 85Z" fill="black" />
-      <rect x="34" y="90" width="2" height="10" fill="black" />
+      <path d="M28 85H42L38 90H32L28 85Z" fill="currentColor" />
+      <rect x="34" y="90" width="2" height="10" fill="currentColor" />
       
       {/* Text "MeoVacinas" in a tall condensed style */}
       <text 
         x="60" 
         y="80" 
-        fill="black" 
+        fill="currentColor" 
         style={{ 
           fontFamily: '"Inter", "Arial Narrow", sans-serif', 
           fontWeight: '500', 
