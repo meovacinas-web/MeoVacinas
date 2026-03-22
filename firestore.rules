@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: responses
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - age: integer (required, 0-120)
+    //   - interest_campaign_2026: boolean (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "meovacinas@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidResponse(data) {
+      return hasRequiredFields(['name', 'age', 'interest_campaign_2026', 'createdAt']) &&
+             hasOnlyAllowedFields(['name', 'age', 'interest_campaign_2026', 'createdAt']) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.age is int && data.age >= 0 && data.age <= 120 &&
+             data.interest_campaign_2026 is bool &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /responses/{responseId} {
+      // Anyone can submit a response (unauthenticated allowed as per survey nature, 
+      // but we could require auth if needed. The prompt doesn't specify auth for form.)
+      // However, guidelines say "initially restricted", but surveys often are public.
+      // I'll allow create for everyone but read only for admin.
+      allow create: if isValidResponse(request.resource.data);
+      
+      // Only admins can read, update, or delete responses
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

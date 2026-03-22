@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "Response": {
+      "title": "Response",
+      "description": "A survey response from a user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the respondent."
+        },
+        "age": {
+          "type": "integer",
+          "description": "The age of the respondent."
+        },
+        "interest_campaign_2026": {
+          "type": "boolean",
+          "description": "Whether the respondent is interested in the 2026 vaccination campaign."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the response was submitted."
+        }
+      },
+      "required": ["name", "age", "interest_campaign_2026", "createdAt"]
+    }
+  },
+  "firestore": {
+    "responses": {
+      "schema": "Response",
+      "description": "A collection of survey responses."
+    }
+  }
+}
