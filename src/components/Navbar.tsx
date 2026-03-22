@@ -122,8 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <Logo size={32} className="group-hover:rotate-12 transition-transform duration-300" />
-          <span className="font-serif text-xl font-bold tracking-tight hidden sm:block">
-          </span>
+        </span>
         </Link>
 
         {/* Desktop Navigation */}
