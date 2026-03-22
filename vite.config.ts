@@ -7,8 +7,8 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss()],
-    // Use the subfolder base path for GitHub Pages compatibility
-    base: '/MeoVacinas/',
+    // Use the root base path for custom domain compatibility
+    base: '/',
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
