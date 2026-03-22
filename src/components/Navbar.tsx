@@ -127,12 +127,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <Logo size={32} className="group-hover:rotate-12 transition-transform duration-300" />
-          <span className="font-serif text-xl font-bold tracking-tight hidden sm:block">
-            Meo
-          </span>
-        </Link>
+   <Link to="/" className="flex items-center gap-3 group">
+  <Logo className="w-10 h-10 transition-transform duration-300 group-hover:rotate-12" />
+  <span className="font-serif text-xl font-bold tracking-tight hidden sm:block">
+    Meo<span className="text-vax-blue italic">Vacinas</span>
+  </span>
+</Link>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-1 bg-slate-100/50 p-1 rounded-full border border-slate-200/50">
