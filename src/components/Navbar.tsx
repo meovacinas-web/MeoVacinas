@@ -41,13 +41,20 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     setIsOpen(false);
   }, [location.pathname]);
 
-  const navItems = [
+  interface NavItem {
+    name: string;
+    path: string;
+    icon: React.ReactNode;
+    external?: boolean;
+  }
+
+  const navItems: NavItem[] = [
     { name: 'Início', path: '/', icon: <Home className="w-4 h-4" /> },
     { name: 'Investigação', path: '/investigation', icon: <Search className="w-4 h-4" /> },
     { name: 'Histórico', path: '/history', icon: <History className="w-4 h-4" /> },
     { name: 'Calendários', path: '/calendars', icon: <Calendar className="w-4 h-4" /> },
     { name: 'Formulário', path: '/pesquisa', icon: <FileText className="w-4 h-4" /> },
-    ...(user ? [{ name: 'Dashboard', path: 'https://admin.meovacinas.com.br', icon: <LayoutDashboard className="w-4 h-4" />, external: true }] : []),
+    ...(user ? [{ name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> }] : []),
   ];
 
   const handleShare = async () => {
@@ -68,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     }
   };
 
-  const NavLink = ({ item, className, mobile = false }: { item: typeof navItems[0], className: string, mobile?: boolean, key?: any }) => {
+  const NavLink = ({ item, className, mobile = false }: { item: NavItem, className: string, mobile?: boolean, key?: any }) => {
     const content = mobile ? (
       <>
         <div className="flex items-center gap-4">

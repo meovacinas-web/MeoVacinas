@@ -362,7 +362,7 @@ const LoginPage = ({ onLogin, onBack }: { onLogin: () => void, onBack: () => voi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.open('https://admin.meovacinas.com.br', '_blank');
+        onLogin();
       }
     });
     return () => unsubscribe();
@@ -1161,8 +1161,7 @@ function AppContent() {
       setIsAuthChecking(false);
       // If user is logged in and on login page, move to dashboard
       if (u && location.pathname === '/login') {
-        window.open('https://admin.meovacinas.com.br', '_blank');
-        navigate('/');
+        navigate('/dashboard');
       }
     });
     return () => unsubscribe();

@@ -6,13 +6,24 @@ service cloud.firestore {
     // Assumed Data Model
     // ===============================================================
     //
-    // Collection: responses
+    // Collection: surveys
     // Document ID: auto-generated
     // Fields:
-    //   - name: string (required, 1-100 chars)
-    //   - age: integer (required, 0-120)
-    //   - interest_campaign_2026: boolean (required)
-    //   - createdAt: timestamp (required)
+    //   - age: string (required)
+    //   - vaccineOpinion: string (required)
+    //   - importance: string (required)
+    //   - updated: string (required)
+    //   - covid: string (required)
+    //   - doses: string (required)
+    //   - last_5_years: string (required)
+    //   - trust: string (required)
+    //   - influence: string (required)
+    //   - skipped: string (required)
+    //   - skipped_reason: string (optional)
+    //   - why_not_vax: string (optional)
+    //   - campaigns: string (required)
+    //   - interest_campaign_2026: string (required)
+    //   - created_at: timestamp (required)
     //
     // ===============================================================
 
@@ -26,8 +37,9 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "meovacinas@gmail.com" && request.auth.token.email_verified == true));
+        ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "meovacinas@gmail.com" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "admin@meovacinas.com.br" && request.auth.token.email_verified == true));
     }
 
     function hasRequiredFields(fields) {
@@ -38,27 +50,38 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly(fields);
     }
 
-    function isValidResponse(data) {
-      return hasRequiredFields(['name', 'age', 'interest_campaign_2026', 'createdAt']) &&
-             hasOnlyAllowedFields(['name', 'age', 'interest_campaign_2026', 'createdAt']) &&
-             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
-             data.age is int && data.age >= 0 && data.age <= 120 &&
-             data.interest_campaign_2026 is bool &&
-             data.createdAt is timestamp;
+    function isValidSurvey(data) {
+      let requiredFields = [
+        'age', 'vaccineOpinion', 'importance', 'updated', 'covid', 
+        'doses', 'last_5_years', 'trust', 'influence', 'skipped', 
+        'campaigns', 'interest_campaign_2026', 'created_at'
+      ];
+      let optionalFields = ['skipped_reason', 'why_not_vax'];
+      let allFields = requiredFields.concat(optionalFields);
+      
+      return hasRequiredFields(requiredFields) &&
+             hasOnlyAllowedFields(allFields) &&
+             data.age is string &&
+             data.vaccineOpinion is string &&
+             data.importance is string &&
+             data.updated is string &&
+             data.covid is string &&
+             data.doses is string &&
+             data.last_5_years is string &&
+             data.trust is string &&
+             data.influence is string &&
+             data.skipped is string &&
+             data.campaigns is string &&
+             data.interest_campaign_2026 is string &&
+             data.created_at is timestamp;
     }
 
     // ===============================================================
     // Rules
     // ===============================================================
 
-    match /responses/{responseId} {
-      // Anyone can submit a response (unauthenticated allowed as per survey nature, 
-      // but we could require auth if needed. The prompt doesn't specify auth for form.)
-      // However, guidelines say "initially restricted", but surveys often are public.
-      // I'll allow create for everyone but read only for admin.
-      allow create: if isValidResponse(request.resource.data);
-      
-      // Only admins can read, update, or delete responses
+    match /surveys/{surveyId} {
+      allow create: if isValidSurvey(request.resource.data);
       allow read, update, delete: if isAdmin();
     }
 
