@@ -1452,7 +1452,7 @@ function AppContent() {
                           Calendários de Vacinação
                         </button>
                         <button 
-                          onClick={() => window.open('https://pesquisa.meovacinas.com.br', '_blank')}
+                          onClick={() => navigate('/pesquisa')}
                           className="px-10 py-4 bg-white border border-vax-blue text-vax-blue rounded-full font-bold hover:bg-vax-blue/5 transition-all shadow-lg shadow-vax-blue/5"
                         >
                           Responder Formulário
@@ -1479,6 +1479,7 @@ function AppContent() {
                   </section>
                 </div>
               } />
+              <Route path="/pesquisa" element={<Formulario />} />
               <Route path="/formulario" element={<Formulario />} />
               <Route path="/investigation" element={<InvestigationPage onBack={() => navigate('/')} />} />
               <Route path="/history" element={<HistoryPage onBack={() => navigate('/')} />} />
@@ -1508,6 +1509,7 @@ function AppContent() {
                   <li><button onClick={() => navigate('/investigation')} className="hover:text-vax-blue transition-colors">Investigação Científica</button></li>
                   <li><button onClick={() => navigate('/history')} className="hover:text-vax-blue transition-colors">Dados Históricos</button></li>
                   <li><button onClick={() => navigate('/calendars')} className="hover:text-vax-blue transition-colors">Calendários Oficiais</button></li>
+                  <li><button onClick={() => navigate('/pesquisa')} className="hover:text-vax-blue transition-colors">Pesquisa de Opinião</button></li>
                   <li><button onClick={() => navigate('/login')} className="px-4 py-2 bg-vax-blue text-white rounded-lg text-xs font-bold hover:bg-vax-blue/90 transition-all mt-4">Acesso Alunos</button></li>
                 </ul>
               </div>

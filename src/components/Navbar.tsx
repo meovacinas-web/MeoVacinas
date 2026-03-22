@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     { name: 'Investigação', path: '/investigation', icon: <Search className="w-4 h-4" /> },
     { name: 'Histórico', path: '/history', icon: <History className="w-4 h-4" /> },
     { name: 'Calendários', path: '/calendars', icon: <Calendar className="w-4 h-4" /> },
-    { name: 'Formulário', path: 'https://pesquisa.meovacinas.com.br', icon: <FileText className="w-4 h-4" />, external: true },
+    { name: 'Formulário', path: '/pesquisa', icon: <FileText className="w-4 h-4" /> },
     ...(user ? [{ name: 'Dashboard', path: 'https://admin.meovacinas.com.br', icon: <LayoutDashboard className="w-4 h-4" />, external: true }] : []),
   ];
 
@@ -122,7 +122,9 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <Logo size={32} className="group-hover:rotate-12 transition-transform duration-300" />
-        </span>
+          <span className="font-serif text-xl font-bold tracking-tight hidden sm:block">
+            Meo<span className="text-vax-blue italic">Vacinas</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
