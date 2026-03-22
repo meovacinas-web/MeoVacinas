@@ -130,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         <Link to="/" className="flex items-center gap-3 group">
           <Logo size={32} className="group-hover:rotate-12 transition-transform duration-300" />
           <span className="font-serif text-xl font-bold tracking-tight hidden sm:block">
-            Meo<span className="text-vax-blue italic">Vacinas</span>
+            Meo
           </span>
         </Link>
 
@@ -200,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <div className="p-6 border-bottom flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Logo size={32} />
-                  <span className="font-serif text-xl font-bold">MeoVacinas</span>
+                  <span className="font-serif text-xl font-bold">Meo</span>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
