@@ -1,12 +1,12 @@
 import React, { useState, useEffect, Component } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import {
-BrowserRouter as Router,
- Routes,
- Route,
- useNavigate,
- useLocation,
- Link
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Link
 } from 'react-router-dom';
 import Formulario from './pages/Formulario';
 import { 
