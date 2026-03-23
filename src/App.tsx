@@ -1,10 +1,10 @@
 import React, { useState, useEffect, Component } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  useNavigate, 
   useLocation,
   Link
 } from 'react-router-dom';
@@ -1201,7 +1201,7 @@ function AppContent() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Routes location={location} key={location.pathname}>
+            <Routes location={location}>
               <Route path="/" element={
                 <div>
                   {/* Hero Section */}
