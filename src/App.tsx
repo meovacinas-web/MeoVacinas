@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Component } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import {
-BrowserRouter as Router
+BrowserRouter as Router,
  Routes,
  Route,
  useNavigate,
