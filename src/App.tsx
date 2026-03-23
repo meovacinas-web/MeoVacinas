@@ -1,12 +1,12 @@
 import React, { useState, useEffect, Component } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
-import { 
-  BrowserRouter as Router, 
-  Routes, 
-  Route, 
-  useNavigate, 
-  useLocation,
-  Link
+import {
+ HashRouter as Router,
+ Routes,
+ Route,
+ useNavigate,
+ useLocation,
+ Link
 } from 'react-router-dom';
 import Formulario from './pages/Formulario';
 import { 
@@ -1201,7 +1201,7 @@ function AppContent() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Routes location={location}>
+            <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <div>
                   {/* Hero Section */}

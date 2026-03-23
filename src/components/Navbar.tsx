@@ -197,6 +197,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <div className="p-6 border-bottom flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Logo size={32} />
+                  <span className="font-serif text-xl font-bold">MeoVacinas</span>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
