@@ -57,7 +57,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "", size = 40 }) => {
           transformOrigin: '60px 80px'
         }}
       >
-        Meo
+        Meo<tspan fill="#0ea5e9" style={{ fontStyle: 'italic' }}>Vacinas</tspan>
       </text>
     </svg>
   );
