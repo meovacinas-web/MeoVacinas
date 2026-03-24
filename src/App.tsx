@@ -418,6 +418,72 @@ const CountdownTimer = () => {
   );
 };
 
+const FloatingVaccine = ({ delay = 0, size = 30, opacity = 0.1, duration = 30 }: { delay?: number, size?: number, opacity?: number, duration?: number }) => {
+  const [startPos] = useState(() => ({
+    x: Math.random() * 100,
+    y: Math.random() * 100
+  }));
+
+  return (
+    <motion.div
+      initial={{ 
+        left: `${startPos.x}%`, 
+        top: `${startPos.y}%`,
+        rotate: 0,
+        opacity: 0
+      }}
+      animate={{ 
+        left: [`${startPos.x}%`, `${(startPos.x + 15) % 100}%`, `${(startPos.x - 15 + 100) % 100}%`, `${startPos.x}%`],
+        top: [`${startPos.y}%`, `${(startPos.y - 15 + 100) % 100}%`, `${(startPos.y + 15) % 100}%`, `${startPos.y}%`],
+        rotate: [0, 90, 180, 270, 360],
+        opacity: [0, opacity, opacity, 0]
+      }}
+      transition={{ 
+        duration: duration, 
+        repeat: Infinity, 
+        delay: delay,
+        ease: "easeInOut"
+      }}
+      className="absolute pointer-events-none z-0"
+      style={{ width: size, height: size }}
+    >
+      <Syringe className="w-full h-full text-vax-blue/40" />
+    </motion.div>
+  );
+};
+
+const VaccineWalker = ({ color = "text-vax-blue", delay = 0, speed = 25, top = "40%" }: { color?: string, delay?: number, speed?: number, top?: string }) => (
+  <motion.div
+    initial={{ left: "-15%", top: top, rotate: 0, opacity: 0 }}
+    animate={{ 
+      left: ["-15%", "115%"],
+      top: [top, "45%", "35%", "50%", top],
+      rotate: [0, 10, -10, 10, 0],
+      opacity: [0, 0.15, 0.15, 0]
+    }}
+    transition={{ 
+      duration: speed, 
+      repeat: Infinity, 
+      delay: delay,
+      ease: "linear"
+    }}
+    className="absolute z-0 pointer-events-none"
+  >
+    <motion.div 
+      animate={{ scale: [1, 1.05, 1] }}
+      transition={{ duration: 3, repeat: Infinity }}
+      className="relative"
+    >
+      <Syringe className={`w-12 h-12 ${color} opacity-40`} />
+      <motion.div 
+        animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.3, 0.1] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+        className={`absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 ${color.replace('text-', 'bg-')} rounded-full blur-sm`}
+      />
+    </motion.div>
+  </motion.div>
+);
+
 const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subtitle?: string }) => (
   <div className="mb-12">
     <motion.h2 
@@ -1294,6 +1360,18 @@ function AppContent() {
                 <div>
                   {/* Hero Section */}
                   <section className="relative min-h-screen flex flex-col items-center justify-center py-20 px-6 text-center overflow-hidden">
+                    {/* Background Vaccines */}
+                    <div className="absolute inset-0 z-0 pointer-events-none">
+                      <VaccineWalker color="text-vax-blue" delay={0} speed={30} top="25%" />
+                      <VaccineWalker color="text-vax-green" delay={5} speed={35} top="55%" />
+                      <VaccineWalker color="text-vax-red" delay={10} speed={40} top="40%" />
+                      
+                      <FloatingVaccine delay={0} size={60} opacity={0.15} duration={40} />
+                      <FloatingVaccine delay={7} size={40} opacity={0.1} duration={45} />
+                      <FloatingVaccine delay={15} size={80} opacity={0.08} duration={50} />
+                    </div>
+
+                    {/* Blur Blobs */}
                     <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
                       <motion.div 
                         animate={{ 
@@ -1317,7 +1395,7 @@ function AppContent() {
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.8 }}
-                      className="z-10 max-w-4xl flex flex-col items-center"
+                      className="z-20 max-w-4xl flex flex-col items-center"
                     >
                       <Logo size={48} className="mb-8 drop-shadow-xl" />
                       <span className="inline-block px-4 py-1 mb-6 text-xs font-mono font-bold tracking-widest uppercase bg-vax-blue/10 text-vax-blue border border-vax-blue/20 rounded-full">
