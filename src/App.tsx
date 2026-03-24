@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Component } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from 'motion/react';
 import { 
   BrowserRouter as Router, 
   Routes, 
@@ -483,6 +483,81 @@ const VaccineWalker = ({ color = "text-vax-blue", delay = 0, speed = 25, top = "
     </motion.div>
   </motion.div>
 );
+
+const CustomCursor = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const springConfig = { damping: 35, stiffness: 450, mass: 0.4 };
+  const cursorX = useSpring(mouseX, springConfig);
+  const cursorY = useSpring(mouseY, springConfig);
+
+  const [isHovering, setIsHovering] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const isClickable = 
+        target.tagName === 'BUTTON' || 
+        target.tagName === 'A' || 
+        target.closest('button') || 
+        target.closest('a') ||
+        target.getAttribute('role') === 'button' ||
+        window.getComputedStyle(target).cursor === 'pointer';
+      
+      setIsHovering(!!isClickable);
+    };
+
+    const handleMouseLeave = () => setIsVisible(false);
+    const handleMouseEnter = () => setIsVisible(true);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseover', handleMouseOver);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseenter', handleMouseEnter);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, [isVisible, mouseX, mouseY]);
+
+  if (!isVisible) return null;
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 z-[9999] pointer-events-none hidden md:block"
+      style={{ x: cursorX, y: cursorY }}
+      animate={{
+        scale: isHovering ? 1.15 : 1,
+        rotate: isHovering ? -10 : -45,
+      }}
+      transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+    >
+      <div className="relative -translate-x-1/2 -translate-y-1/2">
+        <Syringe 
+          className={`w-7 h-7 drop-shadow-[0_0_6px_rgba(14,165,233,0.4)] transition-colors duration-300 ${isHovering ? 'text-vax-green' : 'text-vax-blue'}`} 
+        />
+        {isHovering && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-vax-green rounded-full blur-[2px]"
+          />
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subtitle?: string }) => (
   <div className="mb-12">
@@ -1337,6 +1412,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
+      <CustomCursor />
       <div className="min-h-screen academic-grid overflow-x-hidden">
         {/* Progress Bar */}
         <motion.div 
