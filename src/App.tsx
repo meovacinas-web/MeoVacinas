@@ -28,6 +28,8 @@ import {
   Stethoscope,
   ArrowLeft,
   Info,
+  Clock,
+  MapPin,
   Heart,
   Baby,
   Syringe,
@@ -329,6 +331,92 @@ const calendarsData = [
     pdfUrl: 'https://www.gov.br/saude/pt-br/composicao/svsa/pni/calendario-tecnico/calendario-tecnico-nacional-de-vacinacao-gestante/view'
   }
 ];
+
+const CountdownTimer = () => {
+  const targetDate = new Date('2026-04-14T19:30:00').getTime();
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const TimeUnit = ({ value, label }: { value: number, label: string }) => (
+    <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white/60 backdrop-blur-md rounded-3xl border border-vax-blue/10 w-[90px] h-[90px] md:w-[110px] md:h-[110px] shadow-sm transition-transform hover:scale-105 duration-300">
+      <span className="text-3xl md:text-4xl font-serif font-bold text-vax-blue leading-none">
+        {value.toString().padStart(2, '0')}
+      </span>
+      <span className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-slate-500 mt-2">
+        {label}
+      </span>
+    </div>
+  );
+
+  return (
+    <section className="py-12 px-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="max-w-5xl mx-auto glass-card p-8 md:p-12 rounded-[40px] border-vax-blue/20 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+          <Clock className="w-48 h-48 text-vax-blue" />
+        </div>
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+          <div className="text-center lg:text-left max-w-md">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-vax-blue/10 text-vax-blue rounded-full text-xs font-mono font-bold mb-4">
+              <Zap className="w-3 h-3" /> PRÓXIMA CAMPANHA
+            </div>
+            <h2 className="text-3xl md:text-4xl font-serif mb-4">Inscrições Abertas</h2>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Prepare-se para a campanha de vacinação no <span className="font-bold text-slate-900">Centro Educacional da Fundação de Barretos (Unifeb)</span>.
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-sm text-slate-500 justify-center lg:justify-start">
+                <MapPin className="w-4 h-4 text-vax-blue" />
+                <span>Unifeb, Barretos - SP</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-slate-500 justify-center lg:justify-start">
+                <Calendar className="w-4 h-4 text-vax-blue" />
+                <span>14 e 15 de Abril, 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
+            <TimeUnit value={timeLeft.days} label="Dias" />
+            <TimeUnit value={timeLeft.hours} label="Horas" />
+            <TimeUnit value={timeLeft.minutes} label="Minutos" />
+            <TimeUnit value={timeLeft.seconds} label="Segundos" />
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+};
 
 const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subtitle?: string }) => (
   <div className="mb-12">
@@ -1265,6 +1353,9 @@ function AppContent() {
                       <ChevronDown className="w-8 h-8" />
                     </motion.div>
                   </section>
+
+                  {/* Countdown Section */}
+                  <CountdownTimer />
 
                   {/* The Science Section */}
                   <section className="py-24 px-6 max-w-7xl mx-auto">
