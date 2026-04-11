@@ -332,92 +332,6 @@ const calendarsData = [
   }
 ];
 
-const CountdownTimer = () => {
-  const targetDate = new Date('2026-04-14T19:30:00').getTime();
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance < 0) {
-        clearInterval(timer);
-        return;
-      }
-
-      setTimeLeft({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000)
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  const TimeUnit = ({ value, label }: { value: number, label: string }) => (
-    <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white/60 backdrop-blur-md rounded-3xl border border-vax-blue/10 w-[90px] h-[90px] md:w-[110px] md:h-[110px] shadow-sm transition-transform hover:scale-105 duration-300">
-      <span className="text-3xl md:text-4xl font-serif font-bold text-vax-blue leading-none">
-        {value.toString().padStart(2, '0')}
-      </span>
-      <span className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-slate-500 mt-2">
-        {label}
-      </span>
-    </div>
-  );
-
-  return (
-    <section className="py-12 px-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="max-w-5xl mx-auto glass-card p-8 md:p-12 rounded-[40px] border-vax-blue/20 relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-          <Clock className="w-48 h-48 text-vax-blue" />
-        </div>
-
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-          <div className="text-center lg:text-left max-w-md">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-vax-blue/10 text-vax-blue rounded-full text-xs font-mono font-bold mb-4">
-              <Zap className="w-3 h-3" /> PRÓXIMA CAMPANHA
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif mb-4">Inscrições Abertas</h2>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Prepare-se para a campanha de vacinação no <span className="font-bold text-slate-900">Centro Educacional da Fundação de Barretos (Unifeb)</span>.
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 text-sm text-slate-500 justify-center lg:justify-start">
-                <MapPin className="w-4 h-4 text-vax-blue" />
-                <span>Unifeb, Barretos - SP</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-slate-500 justify-center lg:justify-start">
-                <Calendar className="w-4 h-4 text-vax-blue" />
-                <span>14 e 15 de Abril, 2026</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-            <TimeUnit value={timeLeft.days} label="Dias" />
-            <TimeUnit value={timeLeft.hours} label="Horas" />
-            <TimeUnit value={timeLeft.minutes} label="Minutos" />
-            <TimeUnit value={timeLeft.seconds} label="Segundos" />
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
 const FloatingVaccine = ({ delay = 0, size = 30, opacity = 0.1, duration = 30 }: { delay?: number, size?: number, opacity?: number, duration?: number }) => {
   const [startPos] = useState(() => ({
     x: Math.random() * 100,
@@ -483,81 +397,6 @@ const VaccineWalker = ({ color = "text-vax-blue", delay = 0, speed = 25, top = "
     </motion.div>
   </motion.div>
 );
-
-const CustomCursor = () => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const springConfig = { damping: 35, stiffness: 450, mass: 0.4 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
-
-  const [isHovering, setIsHovering] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const isClickable = 
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('button') || 
-        target.closest('a') ||
-        target.getAttribute('role') === 'button' ||
-        window.getComputedStyle(target).cursor === 'pointer';
-      
-      setIsHovering(!!isClickable);
-    };
-
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseover', handleMouseOver);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-    };
-  }, [isVisible, mouseX, mouseY]);
-
-  if (!isVisible) return null;
-
-  return (
-    <motion.div
-      className="fixed top-0 left-0 z-[9999] pointer-events-none hidden md:block"
-      style={{ x: cursorX, y: cursorY }}
-      animate={{
-        scale: isHovering ? 1.15 : 1,
-        rotate: isHovering ? -10 : -45,
-      }}
-      transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-    >
-      <div className="relative -translate-x-1/2 -translate-y-1/2">
-        <Syringe 
-          className={`w-7 h-7 drop-shadow-[0_0_6px_rgba(14,165,233,0.4)] transition-colors duration-300 ${isHovering ? 'text-vax-green' : 'text-vax-blue'}`} 
-        />
-        {isHovering && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-vax-green rounded-full blur-[2px]"
-          />
-        )}
-      </div>
-    </motion.div>
-  );
-};
 
 const SectionTitle = ({ children, subtitle }: { children: React.ReactNode, subtitle?: string }) => (
   <div className="mb-12">
@@ -767,7 +606,6 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
     { key: 'influence', label: 'Influência Redes Sociais', icon: <Globe className="w-5 h-5 text-blue-500" />, type: 'bar' },
     { key: 'skipped', label: 'Deixou de tomar', icon: <AlertTriangle className="w-5 h-5 text-red-500" />, type: 'pie' },
     { key: 'campaigns', label: 'Eficácia Campanhas', icon: <Users className="w-5 h-5 text-purple-500" />, type: 'pie' },
-    { key: 'interest_campaign_2026', label: 'Interesse Campanha 2026', icon: <Calendar className="w-5 h-5 text-pink-500" />, type: 'pie' },
   ];
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
@@ -798,9 +636,9 @@ const DashboardPage = ({ onLogout, user }: { onLogout: () => void, user: User | 
   };
 
   const downloadData = () => {
-    const headers = "ID,Idade,Opinião Vacina,Importancia,Carteira,COVID,Doses,Ultimos 5 Anos,Confiança,Influencia,Deixou de Tomar,Motivo,Opiniao,Campanhas,Interesse 2026\n";
+    const headers = "ID,Idade,Opinião Vacina,Importancia,Carteira,COVID,Doses,Ultimos 5 Anos,Confiança,Influencia,Deixou de Tomar,Motivo,Opiniao,Campanhas\n";
     const csvContent = surveys.map(r => 
-      `${r.id},"${r.age}","${r.vaccineOpinion}","${r.importance}","${r.updated}","${r.covid}","${r.doses}","${r.last_5_years}","${r.trust}","${r.influence}","${r.skipped}","${r.skipped_reason || ''}","${r.why_not_vax || ''}","${r.campaigns}","${r.interest_campaign_2026 || ''}"`
+      `${r.id},"${r.age}","${r.vaccineOpinion}","${r.importance}","${r.updated}","${r.covid}","${r.doses}","${r.last_5_years}","${r.trust}","${r.influence}","${r.skipped}","${r.skipped_reason || ''}","${r.why_not_vax || ''}","${r.campaigns}"`
     ).join("\n");
     
     const blob = new Blob([headers + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1412,7 +1250,6 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-      <CustomCursor />
       <div className="min-h-screen academic-grid overflow-x-hidden">
         {/* Progress Bar */}
         <motion.div 
@@ -1507,9 +1344,6 @@ function AppContent() {
                       <ChevronDown className="w-8 h-8" />
                     </motion.div>
                   </section>
-
-                  {/* Countdown Section */}
-                  <CountdownTimer />
 
                   {/* The Science Section */}
                   <section className="py-24 px-6 max-w-7xl mx-auto">

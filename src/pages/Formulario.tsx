@@ -55,8 +55,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
     skipped: '',
     skipped_reason: '',
     why_not_vax: '',
-    campaigns: '',
-    interest_campaign_2026: ''
+    campaigns: ''
   });
 
   const [covidVax, setCovidVax] = useState<string>('');
@@ -73,7 +72,7 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
     
     try {
       // Basic validation
-      const requiredFields = ['age', 'vaccineOpinion', 'importance', 'updated', 'covid', 'last_5_years', 'trust', 'influence', 'skipped', 'campaigns', 'interest_campaign_2026'];
+      const requiredFields = ['age', 'vaccineOpinion', 'importance', 'updated', 'covid', 'last_5_years', 'trust', 'influence', 'skipped', 'campaigns'];
       const missingFields = requiredFields.filter(f => !formData[f]);
       
       if (missingFields.length > 0) {
@@ -96,7 +95,6 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
         skipped_reason: formData.skipped_reason || '',
         why_not_vax: formData.why_not_vax || '',
         campaigns: formData.campaigns,
-        interest_campaign_2026: formData.interest_campaign_2026,
         created_at: serverTimestamp()
       };
 
@@ -293,13 +291,6 @@ const SurveyForm = ({ onComplete }: { onComplete: () => void }) => {
       <RadioGroup 
         name="campaigns" 
         label="11. Você acha que campanhas de vacinação são importantes?" 
-        options={['Sim', 'Não', 'Talvez']} 
-      />
-
-      {/* 12. Interesse Campanha 2026 */}
-      <RadioGroup 
-        name="interest_campaign_2026" 
-        label="12. Você tem interesse em participar da campanha de vacinação no dia 14 e 15 de Abril de 2026?" 
         options={['Sim', 'Não', 'Talvez']} 
       />
 
