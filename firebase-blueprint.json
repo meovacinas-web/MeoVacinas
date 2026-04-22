@@ -1,35 +1,88 @@
 {
   "entities": {
-    "Response": {
-      "title": "Response",
-      "description": "A survey response from a user.",
+    "Survey": {
+      "title": "Survey",
+      "description": "A survey response from a user regarding vaccines.",
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name of the respondent."
-        },
         "age": {
-          "type": "integer",
-          "description": "The age of the respondent."
+          "type": "string",
+          "description": "Age range of the respondent."
         },
-        "interest_campaign_2026": {
-          "type": "boolean",
-          "description": "Whether the respondent is interested in the 2026 vaccination campaign."
+        "vaccineOpinion": {
+          "type": "string",
+          "description": "General opinion on vaccines."
         },
-        "createdAt": {
+        "importance": {
+          "type": "string",
+          "description": "Perceived importance of vaccines."
+        },
+        "updated": {
+          "type": "string",
+          "description": "Whether their vax card is updated."
+        },
+        "covid": {
+          "type": "string",
+          "description": "COVID vax status."
+        },
+        "doses": {
+          "type": "string",
+          "description": "Number of COVID doses."
+        },
+        "last_5_years": {
+          "type": "string",
+          "description": "Number of vaccines in last 5 years."
+        },
+        "trust": {
+          "type": "string",
+          "description": "Trust level in vaccines."
+        },
+        "influence": {
+          "type": "string",
+          "description": "Primary influence source."
+        },
+        "skipped": {
+          "type": "string",
+          "description": "Whether they skipped any vax."
+        },
+        "skipped_reason": {
+          "type": "string",
+          "description": "Reason for skipping."
+        },
+        "why_not_vax": {
+          "type": "string",
+          "description": "Opinion on why people skip."
+        },
+        "campaigns": {
+          "type": "string",
+          "description": "Opinion on importance of campaigns."
+        },
+        "created_at": {
           "type": "string",
           "format": "date-time",
-          "description": "The time the response was submitted."
+          "description": "Submission time."
         }
       },
-      "required": ["name", "age", "interest_campaign_2026", "createdAt"]
+      "required": [
+        "age",
+        "vaccineOpinion",
+        "importance",
+        "updated",
+        "covid",
+        "doses",
+        "last_5_years",
+        "trust",
+        "influence",
+        "skipped",
+        "campaigns",
+        "created_at"
+      ]
     }
   },
   "firestore": {
-    "responses": {
-      "schema": "Response",
-      "description": "A collection of survey responses."
+    "surveys": {
+      "schema": "Survey",
+      "description": "Collection for storing survey responses."
     }
   }
 }

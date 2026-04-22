@@ -54,7 +54,7 @@ service cloud.firestore {
       let requiredFields = [
         'age', 'vaccineOpinion', 'importance', 'updated', 'covid', 
         'doses', 'last_5_years', 'trust', 'influence', 'skipped', 
-        'campaigns', 'interest_campaign_2026', 'created_at'
+        'campaigns', 'created_at'
       ];
       let optionalFields = ['skipped_reason', 'why_not_vax'];
       let allFields = requiredFields.concat(optionalFields);
@@ -72,7 +72,6 @@ service cloud.firestore {
              data.influence is string &&
              data.skipped is string &&
              data.campaigns is string &&
-             data.interest_campaign_2026 is string &&
              data.created_at is timestamp;
     }
 
